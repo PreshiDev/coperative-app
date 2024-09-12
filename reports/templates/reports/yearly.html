@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Yearly Report</h2>
+    <form method="POST" hx-post="{% url 'reports:monthly' %}" hx-target="#dynamic-content">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="year">Select Year To Generate Record</label>
+            <select class="form-control" id="year" name="year">
+                {% for year in YEAR_CHOICES %}
+                    <option value="{{ year.0 }}" {% if year.0 == selected_year %}selected{% endif %}>
+                        {{ year.1 }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Generate Report</button>
+    </form>
+
+    <form method="post" action="{% url 'reports:monthly' %}" target="_blank">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="year">Select Year To Download Records</label>
+            <select class="form-control" id="year" name="year">
+                {% for year in YEAR_CHOICES %}
+                    <option value="{{ year.0 }}" {% if year.0 == selected_year %}selected{% endif %}>
+                        {{ year.1 }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" name="download_pdf" class="btn btn-danger mt-2">Download PDF</button>
+        <button type="submit" name="download_excel" class="btn btn-success mt-2">Download Excel</button>
+    </form>
+
+    <hr>
+
+    <h4>Savings</h4>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Owner</th>
+                    <th>Payment Type</th>
+                    <th>Normal Savings</th>
+                    <th>Divine Touch</th>
+                    <th>SP Sav</th>
+                    <th>RSS</th>
+                    <th>Loan Repay</th>
+                    <th>Interest</th>
+                    <th>Commod</th>
+                    <th>Received</th>
+                    <th>Year</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for saving in savings %}
+                    <tr>
+                        <td>{{ saving.owner }}</td>
+                        <td>{{ saving.payment_type }}</td>
+                        <td>{{ saving.normal_savings }}</td>
+                        <td>{{ saving.divine_touch }}</td>
+                        <td>{{ saving.sp_sav }}</td>
+                        <td>{{ saving.rss }}</td>
+                        <td>{{ saving.loan_repay }}</td>
+                        <td>{{ saving.interest }}</td>
+                        <td>{{ saving.commod }}</td>
+                        <td>{{ saving.received }}</td>
+                        <td>{{ saving.year }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

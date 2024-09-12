@@ -1,0 +1,26 @@
+<h2 class="my-4 text-center">Send Message</h2>
+
+<!-- Form to send a new message/query -->
+<form method="post" hx-post="{% url 'members:send_message' %}" hx-target="#messageBody">
+    {% csrf_token %}
+    <div class="form-group mb-3">
+        <label for="id_recipient" class="form-label">Recipient</label>
+        {{ form.recipient }}
+    </div>
+    <div class="form-group mb-3">
+        <label for="id_subject" class="form-label">Subject</label>
+        {{ form.subject }}
+    </div>
+    <div class="form-group mb-3">
+        <label for="id_body" class="form-label">Message</label>
+        {{ form.body }}
+    </div>
+    <button type="submit" class="btn btn-primary">Send</button>
+</form>
+{% if messages %}
+    <div class="alert alert-danger mt-2">
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    </div>
+{% endif %}

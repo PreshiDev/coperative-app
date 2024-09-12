@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3 class="mb-4">{{ title }}</h3>
+
+<form method="get" hx-get="{% url 'savings:edit_saving_account' %}"  hx-target="#dynamic-content" 
+    hx-swap="innerHTML">
+    <div class="form-group">
+        <label for="owner">Owner</label>
+        <select name="owner" class="form-control" id="owner">
+            {% for member in form.fields.owner.queryset %}
+                <option value="{{ member.id }}">{{ member.first_name }} {{ member.last_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="payment_type">Payment Type</label>
+        <select name="payment_type" class="form-control" id="payment_type">
+            <option value="Teller">Teller</option>
+            <option value="Oracle">Oracle</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="month">Month</label>
+        <select name="month" class="form-control" id="month">
+            {% for month in form.fields.month.choices %}
+                <option value="{{ month.0 }}">{{ month.1 }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="year">Year</label>
+        <select name="year" class="form-control" id="year">
+            {% for year in form.fields.year.choices %}
+                <option value="{{ year.0 }}">{{ year.1 }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Fetch Record</button>
+</form>
+
+{% if form.instance.pk %}
+    <form method="post" hx-post="{% url 'savings:edit_saving_account' %}" hx-target="#dynamic-content" 
+        hx-swap="innerHTML">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Save Changes</button>
+    </form>
+{% endif %}
+
+{% if messages %}
+    <div class="alert alert-info">
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+{% endif %}
+
+
+{% endblock content %}

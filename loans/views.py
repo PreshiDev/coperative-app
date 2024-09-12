@@ -1,0 +1,361 @@
+from django.shortcuts import (render, redirect,
+        get_object_or_404)
+from django.contrib import messages
+from django.db.models import Sum
+from django import forms
+
+from .forms import (LoanIssueForm,LoanPaymentForm,
+       GetLoanNumForm,LoanAccountForm,GetLoanAccountForm)
+
+from .models import (LoanAccount,LoanIssue,
+    LoanPayment,LoansIssue)
+
+from accounting.models import Income,IncomeType
+
+# Create your views here.
+
+# for charging loan fee by default look at loan_approve function
+LOAN_FEE_PK = 1
+LOAN_FEE_PERCENT = 2
+
+def loan_account(request):
+    template = 'loans/loans_form.html'
+
+    pk = request.session['ordered_loans_pk']
+    print(pk)
+    print("*************")
+
+    ordered_loan_ac = get_object_or_404(LoanAccount, pk=pk)
+
+    if request.method == 'POST':
+        form = LoanAccountForm(request.POST, instance=ordered_loan_ac)
+    else:
+        form = LoanAccountForm(instance=ordered_loan_ac)
+
+    if form.is_valid():
+        form.save()
+        return redirect('loans:loan')
+
+    context = {
+            'form': form,
+            'title': "Loan",
+            }
+
+    return render(request, template, context)
+
+
+def loan_issue(request, **kwargs):
+    template = 'loans/loans_form.html'
+
+    if request.method == "POST":
+        form = LoanIssueForm(request.POST)
+        if form.is_valid():
+            issue = form.save(commit=False)
+            if issue.account.status == 'Deactivated':
+                messages.warning(request,
+                        "This account is not yet activated please activate the account first")
+                return redirect("loans:loan")
+
+            if issue.status == 'Approved':
+            #adds issued principal to the users account total principal
+                issue.account.total_principal += issue.principal
+                issue.account.save()
+            issue.save()
+            messages.success(request,
+                        'You have successfully issued Rs. {} only loan to the account number {}.'
+                        .format(issue.principal,issue.account.owner.mem_number))
+            if 'pk' in kwargs:
+                return redirect("loans:issuepk", pk=kwargs['pk'])
+            return redirect("loans:issue")
+    else:
+        if 'pk' in kwargs:
+            ac = kwargs['pk']
+            form = LoanIssueForm()
+            form.fields["account"].queryset = LoanAccount.objects.filter(id=ac)
+            form.fields["account"].initial = ac
+            form.fields["account"].widget = forms.HiddenInput()
+        else:
+            form = LoanIssueForm()
+
+    context = {
+        'form': form,
+        'title': "Issue",
+    }
+
+    return render(request, template, context)
+
+
+
+def loan_payment(request, **kwargs):
+    if request.method == "POST":
+        owner_id = request.POST.get('owner')
+        loan_account = LoanAccount.objects.filter(owner_id=owner_id).first()
+
+        if loan_account:
+            form = LoanAccountForm(request.POST, instance=loan_account)
+        else:
+            form = LoanAccountForm(request.POST)
+
+        if form.is_valid():
+            payment = form.save(commit=False)
+            if payment.status == 'Deactivated':
+                messages.warning(request, "This account is not yet activated, please activate the account first.")
+                return redirect("loans:loan")
+
+            # Additional logic to handle payment
+            payment.debit += payment.loan  # Example logic for handling loan payment
+            payment.save()
+
+            messages.success(request, 'Loan account successfully updated or created.')
+            form = LoanAccountForm()  # Reset the form after saving
+        else:
+            print("Form Errors:", form.errors)
+            print("Form Data:", request.POST)
+            messages.error(request, 'There was an error with your submission. Please correct the errors below.')
+    else:
+        form = LoanAccountForm()
+
+    return render(request, 'loans/loans_form.html', {'form': form, 'title': "Record Loan"})
+
+
+
+
+def loan_issue_transactions(request):
+    template = 'loans/loans_transactions.html'
+
+    loans = LoanIssue.objects.filter(status='Approved',delete_status = False)
+    loans_sum = loans.aggregate(Sum('principal'))['principal__sum']
+
+    context = {
+        'transactions': loans,
+        'transactions_sum': loans_sum,
+        'title': "Issue",
+    }
+
+    return render(request, template, context)
+
+def loan_payment_transactions(request):
+    template = 'loans/loans_transactions.html'
+
+    # Assuming you want to display the sum of the loan amounts
+    loans = LoanAccount.objects.filter(owner__is_staff=False, owner__is_superuser=False)
+    loans_sum = loans.aggregate(Sum('loan'))['loan__sum']
+
+    context = {
+        'transactions': loans,
+        'transactions_sum': loans_sum,
+        'title': "Loan",
+    }
+
+    return render(request, template, context)
+
+
+def get_loan_account(request):
+    template = 'loans/loans_form.html'
+
+    form = GetLoanAccountForm(request.POST or None)
+
+    if form.is_valid():
+        loans_account = form.save(commit=False)
+        pk = loans_account.account.pk
+        request.session['ordered_loans_pk']=pk
+        return redirect("loans:de|activate")
+
+    context = {
+        'form': form,
+        'title': 'de|activate',
+        }
+
+    return render(request, template, context)
+
+def loan_issue_transaction(request):
+    template = 'loans/loans_transactions.html'
+
+    form = GetLoanNumForm(request.POST or None)
+
+    if form.is_valid():
+        ordered_loan = form.save(commit=False)
+        loans = LoanIssue.objects.filter(loan_num = ordered_loan.loan_num.loan_num, delete_status = False)
+        loans_sum = loans.aggregate(Sum('principal'))['principal__sum']
+        messages.success(request,
+                        'Loan Issue loans of loan number {}.'
+                        .format(ordered_loan.loan_num))
+
+        context = {
+            'transactions': loans,
+            'transactions_sum': loans_sum,
+            'title': 'Issued',
+        }
+        return render(request, template, context)
+    context = {
+        'form':form,
+        'title':"Issued",
+    }
+
+    return render(request, template, context)
+
+def loan_payment_transaction(request):
+    template = 'loans/loans_transactions.html'
+
+    form = GetLoanNumForm(request.POST or None)
+
+    if form.is_valid():
+        ordered_loan = form.save(commit=False)
+        loans = LoanPayment.objects.filter(loan_num = ordered_loan.loan_num, delete_status = False)
+        loans_sum = loans.aggregate(Sum('principal'))['principal__sum']
+        messages.success(request,
+                         'Loan Payment loans of loan number {}.'
+                         .format(ordered_loan.loan_num))
+
+        context = {
+            'transactions': loans,
+            'transactions_sum': loans_sum,
+            'title': "Payment",
+        }
+
+        return render(request, template, context)
+
+    context = {
+        'form': form,
+        'title': "Payment",
+    }
+
+    return render(request, template, context)
+
+def get_loan(request, **kwargs):
+    template = 'loans/loans_form.html'
+
+    if 'pk' in kwargs:
+        loan_ac = kwargs['pk']
+        form = GetLoanNumForm(request.POST or None)
+        form.fields["loan_num"].queryset = LoanIssue.objects.filter(account=loan_ac, status="Pending")
+    else:
+        form = GetLoanNumForm(request.POST or None)
+        form.fields["loan_num"].queryset = LoanIssue.objects.filter(status="Pending")
+
+    if form.is_valid():
+        loan = form.save(commit=False)
+        if loan.loan_num.status == 'Approved':
+            messages.success(
+                request,
+                'This loan is already approved')
+            if 'pk' in kwargs:
+                return redirect("loans:get_loanpk", pk=kwargs['pk'])
+            else:
+                return redirect("loans:get_loan")
+
+        loan_num = loan.loan_num.loan_num
+        request.session['loan_num']=loan_num
+        return redirect("loans:approve")
+
+    context = {
+        'form': form,
+        'title': "approve",
+    }
+    return render(request, template, context)
+
+def loan_approve(request, **kwargs):
+    template = 'loans/loans_form.html'
+
+    if 'loan_num' in kwargs:
+        loan_num = kwargs['loan_num']
+    else:
+        loan_num = request.session['loan_num']
+
+    ordered_loan = get_object_or_404(LoanIssue, loan_num = loan_num)
+
+    if request.method == "POST":
+        form = LoanIssueForm(request.POST, instance=ordered_loan)
+    else:
+        form = LoanIssueForm(instance=ordered_loan)
+
+    if form.is_valid():
+        issue = form.save(commit=False)
+        if issue.account.status == 'Deactivated':
+            messages.warning(request,
+                        "This account is not yet activated please activate the account first")
+            return redirect("loans:loan")
+        #adds issued principal to the users total_principal of loan ac
+        income_type = get_object_or_404(IncomeType, pk=LOAN_FEE_PK)
+        Income.objects.create(amount=LOAN_FEE_PERCENT/100*issue.principal, received_from=issue.account.owner, loan_num=issue, income_type=income_type)
+        issue.account.total_principal += issue.principal
+        issue.account.save()
+        issue.save()
+        if issue.status == 'Approved':
+            LoansIssue.objects.create(account = issue.account, loan_num = issue.loan_num, principal = issue.principal)
+            messages.success(
+                    request,
+                    'You have issued')
+        else:
+            messages.warning(
+                    request,
+                    'Loan is not yet approved')
+        #if request.session:
+            #del request.session['loan_num']
+        if 'loan_num' in kwargs:
+            issue_instance=get_object_or_404(LoanIssue, loan_num=kwargs['loan_num'])
+            mem_number=issue_instance.account.owner.mem_number
+            return redirect("members:member_detail", mem_number=mem_number)
+        return redirect("loans:get_loan")
+
+    context = {
+        'form': form,
+        'title': "confirm",
+    }
+
+    return render(request, template, context)
+
+def loan(request):
+    template = 'loans/loans.html'
+
+    return render(request, template)
+
+def loan_issue_delete(request, pk):
+    template = 'loans/loans_delete.html'
+
+    issue = get_object_or_404(LoanIssue, pk=pk)
+
+    if request.method == "POST":
+        issue.account.total_principal -= issue.principal
+        issue.account.save()
+        issue.delete_status = True
+        issue.save()
+        messages.success(request,
+                        'You successfully deleted loans_issue of account {}, principal {} and loan no. {}.'
+                        .format(issue.account,issue.principal,issue.loan_num))
+        previous = request.POST.get('previous', None)
+
+        return redirect(previous)
+
+    context = {
+        'item': issue,
+        'type': "issue",
+    }
+
+    return render(request, template, context)
+
+def loan_payment_delete(request, pk):
+    template = 'loans/loans_delete.html'
+
+    payment = get_object_or_404(LoanPayment, pk=pk)
+
+    if request.method == "POST":
+        payment.loan_num.account.total_principal += payment.principal
+        payment.loan_num.account.save()
+        issue.delete_status = True
+        payment.save()
+        messages.success(request,
+                        'You successfully deleted loans_payment of principal {} and loan no. {}.'
+                        .format(payment.principal,payment.loan_num))
+        previous = request.POST.get('previous', None)
+
+        return redirect(previous)
+
+    context = {
+        'item': payment,
+        'type': "payment",
+    }
+
+    return render(request, template, context)
+
+

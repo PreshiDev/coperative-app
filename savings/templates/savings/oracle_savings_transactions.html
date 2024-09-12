@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h3 class="mb-4">{{ title }} Transactions</h3>
+
+<a href="{% url 'savings:download_oracle_savings_excel' %}">Download Excel</a> |
+<a href="{% url 'savings:download_oracle_savings_pdf' %}">Download PDF</a>
+
+<table class="table table-striped table-hover">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Month</th>
+      <th scope="col">Name</th>
+      <th scope="col">Payment Type</th>
+      <th scope="col">Normal Savings</th>
+      <th scope="col">Divine Touch</th>
+      <th scope="col">SP SAV</th>
+      <th scope="col">RSS</th>
+      <th scope="col">Loan Repay</th>
+      <th scope="col">Interest</th>
+      <th scope="col">Commod</th>
+      <th scope="col">Received</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for transaction in transactions %}
+      <tr>
+        <th scope="row">{{ forloop.counter }}</th>
+        <td>{{ transaction.get_month_display }}</td>
+        <td>{{ transaction.owner.first_name }} {{ transaction.owner.last_name }}</td>
+        <td>{{ transaction.payment_type }}</td>
+        <td>{{ transaction.normal_savings }}</td>
+        <td>{{ transaction.divine_touch }}</td>
+        <td>{{ transaction.sp_sav }}</td>
+        <td>{{ transaction.rss }}</td>
+        <td>{{ transaction.loan_repay }}</td>
+        <td>{{ transaction.interest }}</td>
+        <td>{{ transaction.commod }}</td>
+        <td>{{ transaction.received }}</td>
+      </tr>
+    {% endfor %}
+    <tr>
+      <th scope="row">Total</th>
+      <td></td>
+      <td></td>
+      <td>{{ transactions_sum }}</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+{% endblock content %}

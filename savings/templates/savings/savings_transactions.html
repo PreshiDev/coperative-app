@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3 class="mb-4">{{ title }} Transactions</h3>
+
+<!-- Add the download button -->
+<!-- <a href="{% url 'savings:generate_pdf' %}" class="btn btn-success mb-3">Download PDF</a> -->
+<a href="{% url 'savings:download_all_savings_excel' %}" class="btn btn-success mb-3">Download Excel</a> |
+<a href="{% url 'savings:download_all_savings_pdf' %}" class="btn btn-success mb-3">Download PDF</a>
+
+<div style="overflow-x: auto;">
+  <table class="table table-striped table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Month</th>
+        <th scope="col">Name</th>
+        <th scope="col">Payment Type</th>
+        <th scope="col">Received</th>
+        <th scope="col">Normal Savings</th>
+        <th scope="col">Balance</th>
+        <th scope="col">Loan</th>
+        <th scope="col">Loan Balance</th>
+        <th scope="col">Divine Touch</th>
+        <th scope="col">SP SAV</th>
+        <th scope="col">RSS</th>
+        <th scope="col">Loan Repay</th>
+        <th scope="col">Interest</th>
+        <th scope="col">Commod</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for transaction in transactions %}
+        <tr>
+          <th scope="row">{{ forloop.counter }}</th>
+          <td>{{ transaction.get_month_display }}</td>
+          <td>{{ transaction.owner.first_name }} {{ transaction.owner.last_name }}</td>
+          <td>{{ transaction.payment_type }}</td>
+          <td>
+            {{ transaction.received }}
+            {% if transaction.payment_type == "Teller" %}
+              {% if transaction.has_oracle_savings %}
+                <span class="badge badge-info">Sum of Teller + Oracle</span>
+              {% else %}
+                <span class="badge badge-warning">Teller Only</span>
+              {% endif %}
+            {% elif transaction.payment_type == "Oracle" %}
+              <span class="badge badge-warning">Oracle Only</span>
+            {% endif %}
+          </td>
+          <td>{{ transaction.normal_savings }}</td>
+          <td>{{ transaction.balance }}</td>
+          <td>{{ transaction.loan }}</td>
+          <td>{{ transaction.loan_balance }}</td>
+          <td>{{ transaction.divine_touch }}</td>
+          <td>{{ transaction.sp_sav }}</td>
+          <td>{{ transaction.rss }}</td>
+          <td>{{ transaction.loan_repay }}</td>
+          <td>{{ transaction.interest }}</td>
+          <td>{{ transaction.commod }}</td>
+          <td>
+            <a hx-get="{% url 'savings:delete_transaction' transaction.pk %}" hx-target="#modalBody" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#exampleModal">Delete</a>
+          </td>
+        </tr>
+      {% endfor %}
+      <tr>
+        <th scope="row">Total</th>
+        <td></td>
+        <td></td>
+        <td>{{ transactions_sum }}</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+
+{% endblock content %}

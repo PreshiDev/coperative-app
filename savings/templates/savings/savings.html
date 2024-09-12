@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+	{% if messages %}
+	{% for message in messages %}
+	<p>{{message}}</p>
+	{% endfor %}
+	{% endif %}
+
+	<h2 class="text-center">Savings Account Management</h2>
+	<div class="row p-3 mt-3">
+		<div class="col-md-6">
+			<h4>Operations</h4>
+			<h3><a hx-get="{% url 'savings:deposit' %}" hx-target="#dynamic-content" class="btn btn-outline-info">Account Operations</a></h3>
+			<h3><a class="btn btn-outline-info" hx-get="{% url 'savings:edit_saving_account' %}" hx-target="#dynamic-content">Edit</a></h3>
+			<h4>Add Previous Balance & New Figures</h4>
+			<h3><a class="btn btn-outline-info" hx-get="{% url 'savings:add_loan_account' %}" hx-target="#dynamic-content">Loan</a></h3>
+			<h3><a class="btn btn-outline-info" hx-get="{% url 'savings:add_interest_account' %}" hx-target="#dynamic-content">Interest</a></h3>
+			<h3><a class="btn btn-outline-info" hx-get="{% url 'savings:add_commodity_account' %}" hx-target="#dynamic-content">Commodity</a></h3>
+		</div>
+		<div class="col-md-6">
+			<h4>Transactions</h4>
+			<h3><a hx-get="{% url 'savings:transactions' %}" hx-target="#dynamic-content" class="btn btn-outline-primary">All Deposit Transactions</a></h3>
+			<h3><a hx-get="{% url 'savings:teller_savings_transactions' %}" hx-target="#dynamic-content" class="btn btn-outline-primary">Teller Transactions</a></h3>
+			<h3><a hx-get="{% url 'savings:oracle_savings_transactions' %}" hx-target="#dynamic-content" class="btn btn-outline-primary">Oracle Transactions</a></h3>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

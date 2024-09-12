@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Top Row: Profile, Notifications, Messages -->
+    <div class="d-flex justify-content-end mb-4">
+        <!-- Profile Button -->
+        <button type="button" class="btn btn-primary me-2" data-toggle="modal" data-target="#exampleModalLong">
+            Profile
+        </button>
+
+        <!-- Notifications Button -->
+        <button hx-get="{% url 'members:member_inbox' %}" hx-target="#modalBody" type="button" class="btn btn-warning me-2" data-toggle="modal" data-target="#exampleModal">
+            Inbox
+        </button>
+
+        <!-- Messages Button -->
+        <button hx-get="{% url 'members:send_message' %}" hx-target="#messageBody" type="button" class="btn btn-info" data-toggle="modal" data-target="#exampleModalCenter">
+            Messages
+        </button>
+
+        <!-- Logout Button -->
+        <a href="{% url 'members:logout' %}" class="btn btn-danger">Logout</a>
+
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal fade"  class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="profileModalLabel">User Profile</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        {% if member.image %}
+                            <img src="{{ member.image.url }}" alt="Profile Picture" class="img-fluid rounded-circle" style="width: 120px; height: 120px;">
+                        {% endif %}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <p class="mb-0"><strong>Full Name:</strong> {{ member.first_name }} {{ member.last_name }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <p class="mb-0"><strong>Membership Number:</strong> {{ member.mem_number }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <p class="mb-0"><strong>Address:</strong> {{ member.address }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <p class="mb-0"><strong>Contact:</strong> {{ member.contact }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <p class="mb-0"><strong>Account Status:</strong> {{ member.get_status_display }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <p class="mb-0"><strong>Date Created:</strong> {{ member.date_created|date:"d M Y" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <p class="mb-0"><strong>Last Updated:</strong> {{ member.date_updated|date:"d M Y" }}</p>
+                        </div>
+                    </div>
+                    <a hx-get="{% url 'members:edit_account' %}" hx-target="#modalBody" data-toggle="modal" data-target="#exampleModal" class="btn btn-primary d-block mx-auto">Edit Profile</a>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <!-- Messages Modal -->
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="messagesModalLabel">Messages & Queries</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="messageBody">
+                    <!-- Messages list -->
+                    {% for message in messages %}
+                        <div class="alert alert-secondary">
+                            <p>{{ message.content }}</p>
+                            <small>{{ message.created_at|date:"d M Y H:i" }}</small>
+                        </div>
+                    {% empty %}
+                        <p>No messages available.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Dashboard Cards for Savings and Loans -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card text-center">
+            <div class="card-body shadow-lg">
+                <h5 class="card-title">Total Savings</h5>
+                <p class="card-text text-success">{{ transactions_sum|floatformat:2 }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card text-center">
+            <div class="card-body shadow-lg">
+                <h5 class="card-title">Divine Touch Balance</h5>
+                <p class="card-text text-success">{{ divine_touch_sum|floatformat:2 }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-center">
+            <div class="card-body shadow-lg">
+                <h5 class="card-title">RSS Balance</h5>
+                <p class="card-text text-success">{{ rss_sum|floatformat:2 }}</p>
+            </div>
+        </div>
+    </div>
+    <!-- <div class="col-md-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">SP Savings Balance</h5>
+                <p class="card-text">{{ sp_sav_sum|floatformat:2 }}</p>
+            </div>
+        </div>
+    </div> -->
+    <div class="col-md-6">
+        <div class="card text-center">
+            <div class="card-body shadow-lg">
+                <h5 class="card-title">Loan Balance</h5>
+                <p class="card-text text-danger">{{ loan_balance|floatformat:2 }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-center">
+            <div class="card-body shadow-lg">
+                <h5 class="card-title">Interest Balance</h5>
+                <p class="card-text text-danger">{{ interest_balance|floatformat:2 }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-center">
+            <div class="card-body shadow-lg">
+                <h5 class="card-title">Commodity Balance</h5>
+                <p class="card-text text-danger">{{ commod_balance|floatformat:2 }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <!-- Buttons to view Monthly and Yearly records -->
+    <div class="d-flex justify-content-around mt-4">
+        <button type="button" class="btn btn-success" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+            View Record
+        </button>
+        <!-- <button type="button" class="btn btn-primary" type="button" data-toggle="collapse" data-target="#multiCollapseExample2" aria-expanded="false" aria-controls="multiCollapseExample2">
+            View Yearly Record
+        </button> -->
+    </div>
+
+    <!-- Monthly Records Modal -->
+    <div class="collapse" id="collapseExample">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="monthlyRecordsModalLabel">Records</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Table for monthly records -->
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Payment Type</th>
+                                <th>Divine Touch</th>
+                                <th>SP Sav</th>
+                                <th>RSS</th>
+                                <th>Received</th>
+                                <th>Loan</th>
+                                <th>Interest</th>
+                                <th>Loan Repay</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in transactions %}
+                                <tr>
+                                    <td>{{ transaction.date_created|date:"d M Y" }}</td>
+                                    <td>{{ transaction.payment_type }}</td>
+                                    <td>{{ transaction.divine_touch|floatformat:2 }}</td>
+                                    <td>{{ transaction.sp_sav|floatformat:2 }}</td>
+                                    <td>{{ transaction.rss|floatformat:2 }}</td>
+                                    <td>{{ transaction.received|floatformat:2 }}</td>
+                                    <td>{{ transaction.loan|floatformat:2 }}</td>
+                                    <td>{{ transaction.interest|floatformat:2 }}</td>
+                                    <td>{{ transaction.loan_repay|floatformat:2 }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6">No savings records available.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Yearly Records Modal -->
+    <div class="collapse multi-collapse" id="multiCollapseExample2">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="yearlyRecordsModalLabel">Yearly Record</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Table for yearly records -->
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in yearly_records %}
+                                <tr>
+                                    <td>{{ record.date|date:"d M Y" }}</td>
+                                    <td>{{ record.description }}</td>
+                                    <td>{{ record.amount|floatformat:2 }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="3">No records available for this year.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block script %}
+
+<script>
+    // Show modals when the corresponding buttons are clicked (Bootstrap handles this automatically)
+    $(document).ready(function () {
+        // If you need custom modal behavior, you can handle it here
+
+        // Example: Manually trigger a modal to open
+        $('#profileButton').click(function () {
+            $('#profileModal').modal('show');
+        });
+
+        $('#notificationsButton').click(function () {
+            $('#notificationsModal').modal('show');
+        });
+
+        $('#messagesButton').click(function () {
+            $('#messagesModal').modal('show');
+        });
+    });
+
+    // Table row dropdown (expand/collapse functionality for monthly/yearly records)
+    $(document).on('click', '.toggle-details', function () {
+        // Toggle visibility of the next row (which contains detailed data)
+        $(this).closest('tr').next('.hidden-row').toggleClass('d-none');
+    });
+</script>
+
+{% endblock %}

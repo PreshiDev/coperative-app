@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">{{ title }}</h2>
+
+    {% if messages %}
+        <div class="alert alert-info">
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="POST" class="form-horizontal" hx-post="{% url 'loans:pay' %}" hx-target="#dynamic-content" 
+      hx-swap="innerHTML">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="owner">Select User</label>
+            {% render_field form.owner class="form-control" %}
+        </div>
+
+        <div class="form-group">
+            <label for="loan_type">Loan Type</label>
+            {% render_field form.loan_type class="form-control" %}
+        </div>
+
+        <div class="form-group">
+            <label for="loan">Loan Amount</label>
+            {% render_field form.loan class="form-control" %}
+        </div>
+
+        <div class="form-group">
+            <label for="debit">Debit</label>
+            {% render_field form.debit class="form-control" %}
+        </div>
+
+        <div class="form-group">
+            <label for="credit">Credit</label>
+            {% render_field form.credit class="form-control" %}
+        </div>
+
+        <div class="form-group text-center">
+            <input type="submit" value="{{ title }}" class="btn btn-primary btn-lg" />
+        </div>
+    </form>
+</div>
+{% endblock %}

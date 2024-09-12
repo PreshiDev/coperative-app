@@ -1,0 +1,78 @@
+<div class="container mt-5">
+    <h2>Your Inbox</h2>
+
+    <div class="card mt-4">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Received Messages</h3>
+        </div>
+        <div class="card-body">
+            {% if received_messages %}
+                <ul class="list-group">
+                    {% for message in received_messages %}
+                        <li class="list-group-item">
+                            <a href="#">
+                                <strong>{{ message.sender.username }}</strong>: {{ message.subject }}
+                            </a>
+                            <span class="float-right text-muted">{{ message.date_sent }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No received messages.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header bg-secondary text-white">
+            <h3 class="mb-0">Sent Messages</h3>
+        </div>
+        <div class="card-body">
+            {% if sent_messages %}
+                <ul class="list-group">
+                    {% for message in sent_messages %}
+                        <li class="list-group-item">
+                            <strong>{{ message.recipient.username }}</strong>: {{ message.subject }}
+                            <span class="float-right text-muted">{{ message.date_sent }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No sent messages.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header bg-info text-white">
+            <h3 class="mb-0">Replied Messages</h3>
+        </div>
+        <div class="card-body">
+            {% if replies %}
+                <div class="accordion" id="repliesAccordion">
+                    {% for reply in replies %}
+                        <div class="card">
+                            <div class="card-header" id="heading{{ reply.id }}">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse{{ reply.id }}" aria-expanded="true" aria-controls="collapse{{ reply.id }}">
+                                        <strong>{{ reply.sender.username }}</strong>: {{ reply.subject }}
+                                    </button>
+                                </h2>
+                            </div>
+
+                            <div id="collapse{{ reply.id }}" class="collapse" aria-labelledby="heading{{ reply.id }}" data-parent="#repliesAccordion">
+                                <div class="card-body">
+                                    <p>{{ reply.body }}</p>
+                                    <!-- <span class="text-muted">{{ reply.date_sent }}</span>
+                                    <a href="{% url 'members:view_message' message_id=reply.id %}" class="btn btn-primary mt-3">View Full Reply</a> -->
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>No replies.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>

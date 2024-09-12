@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Monthly Report</h2>
+    <form method="post" hx-post="{% url 'reports:monthly' %}" hx-target="#dynamic-content">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="month">Select Month Record To Be Generated</label>
+            <select class="form-control" id="month" name="month">
+                {% for month_num, month_name in MONTH_CHOICES %}
+                    <option value="{{ month_num }}" {% if month_num == selected_month %}selected{% endif %}>
+                        {{ month_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="year">Year</label>
+            <select class="form-control" id="year" name="year">
+                {% for year_value, year_display in YEAR_CHOICES %}
+                    <option value="{{ year_value }}" {% if year_value == selected_year %}selected{% endif %}>
+                        {{ year_display }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <!-- Generate Report Button -->
+        <button type="submit" class="btn btn-primary mt-2">Generate Report</button>
+    </form>
+
+    <!-- Separate form for downloading PDF -->
+    <form method="post" action="{% url 'reports:monthly' %}" target="_blank">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="month">Select Month Record To Be Downloaded</label>
+            <select class="form-control" id="month" name="month">
+                {% for month_num, month_name in MONTH_CHOICES %}
+                    <option value="{{ month_num }}" {% if month_num == selected_month %}selected{% endif %}>
+                        {{ month_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="year">Year</label>
+            <select class="form-control" id="year" name="year">
+                {% for year_value, year_display in YEAR_CHOICES %}
+                    <option value="{{ year_value }}" {% if year_value == selected_year %}selected{% endif %}>
+                        {{ year_display }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" name="download_pdf" class="btn btn-danger mt-2">Download PDF</button>
+        <button type="submit" name="download_excel" class="btn btn-success mt-2">Download Excel</button>
+    </form>
+
+    
+    <hr>
+
+    <h4>Savings</h4>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Owner</th>
+                    <th>Payment Type</th>
+                    <th>Normal Savings</th>
+                    <th>Divine Touch</th>
+                    <th>SP Sav</th>
+                    <th>RSS</th>
+                    <th>Loan Repay</th>
+                    <th>Interest</th>
+                    <th>Commod</th>
+                    <th>Received</th>
+                    <th>Month</th>
+                    <th>Year</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for saving in savings %}
+                    <tr>
+                        <td>{{ saving.owner }}</td>
+                        <td>{{ saving.payment_type }}</td>
+                        <td>{{ saving.normal_savings }}</td>
+                        <td>{{ saving.divine_touch }}</td>
+                        <td>{{ saving.sp_sav }}</td>
+                        <td>{{ saving.rss }}</td>
+                        <td>{{ saving.loan_repay }}</td>
+                        <td>{{ saving.interest }}</td>
+                        <td>{{ saving.commod }}</td>
+                        <td>{{ saving.received }}</td>
+                        <td>{{ saving.get_month_display }}</td>
+                        <td>{{ saving.year }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}
