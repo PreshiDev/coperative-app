@@ -262,7 +262,7 @@ def send_message(request):
             )
             
             messages.success(request, 'Message Sent successfully')
-            return redirect('some_view_name')  # Redirect to prevent form resubmission
+            #return redirect('some_view_name')  # Redirect to prevent form resubmission
     else:
         form = MessageForm()
 
@@ -303,10 +303,14 @@ def member_inbox(request):
     sent_messages = Message.objects.filter(sender=request.user, is_reply=False).order_by('-date_sent')
     replies = Message.objects.filter(recipient=request.user, is_reply=True).order_by('-date_sent')  # Replies from admins
 
+    # Count unread replies from the admin
+    unread_replies_count = Message.objects.filter(recipient=request.user, is_reply=True, is_read=False).count()
+
     context = {
         'received_messages': received_messages,
         'sent_messages': sent_messages,
         'replies': replies,
+        'unread_replies_count': unread_replies_count,  # Pass count to template
     }
     return render(request, 'members/member_inbox.html', context)
 
@@ -393,8 +397,7 @@ def unread_notifications_count(request):
         return JsonResponse({'unread_count': unread_count})
     return JsonResponse({'unread_count': 0})
 
-
 def mark_notifications_as_read(request):
     if request.user.is_authenticated:
         Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
-    return redirect('some_view_name')
+    return JsonResponse({'status': 'success'})  # Respond with success

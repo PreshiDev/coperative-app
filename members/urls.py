@@ -24,9 +24,9 @@ urlpatterns = [
         path('staff/edit-account/', StaffAccountEditView, name='staff_edit_account'),
         path('staff/add/', AddStaffMemberView, name='add_staff_member'),
         path('admin_dashboard/', member, name='admin_dashboard'),
-         # URL for fetching unread notifications count
+        # URL for fetching unread notifications count
         path('unread_notifications_count/', unread_notifications_count, name='unread_notifications_count'),
-        
+
         # URL for marking notifications as read
         path('mark_notifications_as_read/', mark_notifications_as_read, name='mark_notifications_as_read'),
 ]

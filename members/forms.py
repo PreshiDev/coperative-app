@@ -63,6 +63,13 @@ class MembershipAccountEditForm(forms.ModelForm):
             'password': forms.PasswordInput(),  # Use PasswordInput to hide password text
         }
 
+    def __init__(self, *args, **kwargs):
+        super(MembershipAccountEditForm, self).__init__(*args, **kwargs)
+        # Make the fields readonly
+        self.fields['first_name'].widget.attrs['readonly'] = True
+        self.fields['last_name'].widget.attrs['readonly'] = True
+        self.fields['other_name'].widget.attrs['readonly'] = True
+
     def clean_password(self):
         password = self.cleaned_data.get('password')
         # Only generate a random password if it's not valid and empty, otherwise leave it as is

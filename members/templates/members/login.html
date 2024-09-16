@@ -19,6 +19,11 @@
                                 <label for="password" class="form-label">Password</label>
                                 <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
                             </div>
+                            <!-- Show Password Checkbox -->
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="showPassword" onclick="togglePassword()">
+                                <label class="form-check-label" for="showPassword">Show Password</label>
+                            </div>
                             <button type="submit" class="btn btn-primary w-100">Login</button>
                         </form>
                     </div>
@@ -37,4 +42,15 @@
         </div>
     </div>
 
+    <!-- JavaScript to toggle password visibility -->
+    <script>
+        function togglePassword() {
+            var passwordInput = document.getElementById('password');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+            } else {
+                passwordInput.type = 'password';
+            }
+        }
+    </script>
 {% endblock %}

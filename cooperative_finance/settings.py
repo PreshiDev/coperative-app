@@ -24,7 +24,7 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 SECRET_KEY = 'l+bt#3_^!w36012^3bczo$k&s^h^9)!fd5yh$70he$@@1$4_#9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -102,12 +102,25 @@ WSGI_APPLICATION = 'cooperative_finance.wsgi.application'
 #     }
 # }
 
-DATABASES = {  
+
+DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'rilhkbcy_sangocoop',
+        'USER': 'rilhkbcy_sangocoop',
+        'PASSWORD': 'MoneyPower@6000',
+        'HOST': 'localhost',  # Or your database host
+        'PORT': '3306',  # Default port for MySQL
     }
 }
+
+
+# DATABASES = {  
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
 
 
 # Password validation

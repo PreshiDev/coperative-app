@@ -97,4 +97,44 @@
         {% endif %}
     </form>
 </div>
+
+
+
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        const formatNumber = (n) => {
+            return n.replace(/\D/g, "")  // Remove non-numeric characters
+                     .replace(/\B(?=(\d{3})+(?!\d))/g, ",");  // Add commas every 3 digits
+        };
+
+        const fields = ['received', 'normal_savings', 'balance', 'divine_touch', 'sp_sav', 'rss', 'loan', 'interest', 'commod', 'loan_repay', 'interest_repay', 'commod_repay'];
+
+        fields.forEach(function (field) {
+            const input = document.getElementById('id_' + field);
+
+            if (input) {
+                // Ensure commas are added as the user types
+                input.addEventListener('input', function (e) {
+                    // Get the caret position before formatting
+                    let caretPosition = input.selectionStart;
+
+                    // Remove commas and format the number
+                    let value = e.target.value.replace(/,/g, '');  // Remove any existing commas
+                    e.target.value = formatNumber(value);  // Format the number with commas
+
+                    // Adjust the caret position after adding commas
+                    let newCaretPosition = Math.max(caretPosition - (value.length - e.target.value.length), 0);
+                    input.setSelectionRange(newCaretPosition, newCaretPosition);
+                });
+
+                // Ensure that if the form is pre-filled, the number is formatted correctly
+                if (input.value) {
+                    let initialValue = input.value.replace(/,/g, '');  // Remove commas in case of pre-filled value
+                    input.value = formatNumber(initialValue);  // Add commas to the initial value
+                }
+            }
+        });
+    });
+</script>
+
 {% endblock %}

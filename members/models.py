@@ -48,7 +48,7 @@ class Member(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=256)
     last_name = models.CharField(max_length=256)
     other_name = models.CharField(max_length=256, blank=True, null=True)
-    address = models.CharField(max_length=256)
+    address = models.CharField(max_length=256, blank=True, null=True)
     contact = models.CharField(max_length=11)
     status = models.CharField(choices=ACCOUNT_STATUS_CHOICE, default='Activated', max_length=11, editable=False)
     password = models.CharField(max_length=128)  # Use set_password for hashing
