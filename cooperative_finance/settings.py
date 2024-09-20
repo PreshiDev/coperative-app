@@ -103,24 +103,24 @@ WSGI_APPLICATION = 'cooperative_finance.wsgi.application'
 # }
 
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'rilhkbcy_sangocoop',
-#         'USER': 'rilhkbcy_sangocoop',
-#         'PASSWORD': 'MoneyPower@6000',
-#         'HOST': 'localhost',  # Or your database host
-#         'PORT': '3306',  # Default port for MySQL
-#     }
-# }
-
-
-DATABASES = {  
+DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'rilhkbcy_sangocoop',
+        'USER': 'rilhkbcy_sangocoop',
+        'PASSWORD': 'MoneyPower@6000',
+        'HOST': 'localhost',  # Or your database host
+        'PORT': '3306',  # Default port for MySQL
     }
 }
+
+
+# DATABASES = {  
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
 
 
 # Password validation
