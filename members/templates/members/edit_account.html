@@ -5,7 +5,7 @@
         <div class="">
             <div class="card w-100">
                 <div class="card-header text-center">
-                    <h3>Edit Account precious</h3>
+                    <h3>Edit Your Account</h3>
                 </div>
                 <div class="card-body">
                     <form method="post" hx-post="{% url 'members:edit_account' %}" hx-target="#modalBody" enctype="multipart/form-data">
@@ -44,7 +44,7 @@
                             {{ form.image|add_class:"form-control w-100" }}
                         </div>
                         
-                        <button type="submit" class="btn btn-primary w-100">Update Account</button>
+                        <button type="submit" class="btn btn-primary text-white w-100">Update Account</button>
                     </form>
                 </div>
                 <div class="card-footer text-center">

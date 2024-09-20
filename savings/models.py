@@ -48,6 +48,7 @@ class SavingAccount(models.Model):
     loan = models.PositiveIntegerField(default=0)  # New field for loan addition
     interest = models.PositiveIntegerField(default=0)  # New field for interest addition
     commod = models.PositiveIntegerField(default=0)  # New field for commodity addition
+    share = models.PositiveIntegerField(default=0)  # New field for shares
     month = models.IntegerField(choices=MONTH_CHOICES, default=datetime.date.today().month)
     year = models.IntegerField(choices=YEAR_CHOICES, default=datetime.date.today().year)
     status = models.CharField(choices=ACCOUNT_STATUS_CHOICE, default='Activated', max_length=11)
@@ -55,59 +56,37 @@ class SavingAccount(models.Model):
     date_updated = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        # Fetch existing instance if the record already exists
+        # Fetch existing instance if it exists
         if self.pk:
             existing_instance = SavingAccount.objects.get(pk=self.pk)
-            
-            # Handle loan operations
-            loan_account = self.owner.loan_accounts.first()
-            if loan_account:
-                # Check if there's a loan value to add
-                if self.loan > 0:
-                    loan_account.loan_balance += self.loan  # Add loan to the balance
-                
-                # Check if there's a repayment to deduct
-                if self.loan_repay > 0:
-                    loan_account.loan_balance -= self.loan_repay  # Subtract loan repayment
-                    loan_account.loan_balance = max(loan_account.loan_balance, 0)  # Ensure no negative balance
-                
-                loan_account.save()  # Save the loan account after updates
 
-            # Handle interest operations
-            interest_account = self.owner.interest_accounts.first()
-            if interest_account:
-                # Check if there's an interest value to add
-                if self.interest > 0:
-                    interest_account.interest_balance += self.interest  # Add interest to the balance
+        # Process accounts (loan, interest, commodity) in a DRY manner
+        def process_account(account, value_field, repay_field, balance_field):
+            if account:
+                if getattr(self, value_field) > 0:
+                    setattr(account, balance_field, getattr(account, balance_field) + getattr(self, value_field))
+                if getattr(self, repay_field) > 0:
+                    setattr(account, balance_field, getattr(account, balance_field) - getattr(self, repay_field))
+                    setattr(account, balance_field, max(getattr(account, balance_field), 0))  # Ensure no negative balance
+                account.save()
 
-                # Check if there's an interest repayment to deduct
-                if self.interest_repay > 0:
-                    interest_account.interest_balance -= self.interest_repay  # Subtract interest repayment
-                    interest_account.interest_balance = max(interest_account.interest_balance, 0)  # Ensure no negative balance
+        # Loan account processing
+        loan_account = self.owner.loan_accounts.first()
+        process_account(loan_account, 'loan', 'loan_repay', 'loan_balance')
 
-                interest_account.save()  # Save the interest account after updates
+        # Interest account processing
+        interest_account = self.owner.interest_accounts.first()
+        process_account(interest_account, 'interest', 'interest_repay', 'interest_balance')
 
-            # Handle commodity operations
-            commodity_account = self.owner.commodity_accounts.first()
-            if commodity_account:
-                # Check if there's a commodity value to add
-                if self.commod > 0:
-                    commodity_account.commod_balance += self.commod  # Add commodity to the balance
-                
-                # Check if there's a commodity repayment to deduct
-                if self.commod_repay > 0:
-                    commodity_account.commod_balance -= self.commod_repay  # Subtract commodity repayment
-                    commodity_account.commod_balance = max(commodity_account.commod_balance, 0)  # Ensure no negative balance
-                
-                commodity_account.save()  # Save the commodity account after updates
+        # Commodity account processing
+        commodity_account = self.owner.commodity_accounts.first()
+        process_account(commodity_account, 'commod', 'commod_repay', 'commod_balance')
 
-        else:
-            # If it's a new record, simply add the normal savings to balance
-            self.balance += self.normal_savings
+        # Add normal_savings to balance
+        self.balance += self.normal_savings
 
-        # Call the parent class's save method to handle other fields and logic
+        # Call the parent save method to complete the save process
         super(SavingAccount, self).save(*args, **kwargs)
-
 
 
 

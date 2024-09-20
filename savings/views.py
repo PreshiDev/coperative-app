@@ -44,50 +44,148 @@ def saving_account(request):
     return render(request, template, context)
 
 
-def saving_deposit(request):
-    if request.method == 'POST':
-        owner_id = request.POST.get('owner')
-        payment_type = request.POST.get('payment_type')
+# def saving_deposit(request):
+#     if request.method == 'POST':
+#         owner_id = request.POST.get('owner')
+#         payment_type = request.POST.get('payment_type')
 
-        try:
-            saving_account = SavingAccount.objects.get(owner_id=owner_id, payment_type=payment_type)
-        except SavingAccount.DoesNotExist:
-            saving_account = SavingAccount(owner_id=owner_id, payment_type=payment_type)
+#         try:
+#             saving_account = SavingAccount.objects.get(owner_id=owner_id, payment_type=payment_type)
+#         except SavingAccount.DoesNotExist:
+#             saving_account = SavingAccount(owner_id=owner_id, payment_type=payment_type)
 
-        # Fetch values from the form, default to 0 if none provided
-        received = float(request.POST.get('received', 0))
-        normal_savings = float(request.POST.get('normal_savings', 0))
-        divine_touch = float(request.POST.get('divine_touch', 0))
-        sp_sav = float(request.POST.get('sp_sav', 0))
-        rss = float(request.POST.get('rss', 0))
-        loan_repay = float(request.POST.get('loan_repay', 0))
-        interest_repay = float(request.POST.get('interest_repay', 0))
-        commod_repay = float(request.POST.get('commod_repay', 0))
-        loan = float(request.POST.get('loan', 0))
-        interest = float(request.POST.get('interest', 0))
-        commod = float(request.POST.get('commod', 0))
+#         # Fetch values from the form, default to 0 if none provided
+#         received = float(request.POST.get('received', 0))
+#         normal_savings = float(request.POST.get('normal_savings', 0))
+#         divine_touch = float(request.POST.get('divine_touch', 0))
+#         sp_sav = float(request.POST.get('sp_sav', 0))
+#         rss = float(request.POST.get('rss', 0))
+#         loan_repay = float(request.POST.get('loan_repay', 0))
+#         interest_repay = float(request.POST.get('interest_repay', 0))
+#         commod_repay = float(request.POST.get('commod_repay', 0))
+#         loan = float(request.POST.get('loan', 0))
+#         interest = float(request.POST.get('interest', 0))
+#         commod = float(request.POST.get('commod', 0))
 
-        # Update saving account fields
-        saving_account.received += received
-        saving_account.normal_savings += normal_savings
-        saving_account.divine_touch += divine_touch
-        saving_account.sp_sav += sp_sav
-        saving_account.rss += rss
-        saving_account.loan_repay += loan_repay
-        saving_account.interest_repay += interest_repay
-        saving_account.commod_repay += commod_repay
-        saving_account.loan += loan
-        saving_account.interest += interest
-        saving_account.commod += commod
+#         # Update saving account fields
+#         saving_account.received += received
+#         saving_account.normal_savings += normal_savings
+#         saving_account.divine_touch += divine_touch
+#         saving_account.sp_sav += sp_sav
+#         saving_account.rss += rss
+#         saving_account.loan_repay += loan_repay
+#         saving_account.interest_repay += interest_repay
+#         saving_account.commod_repay += commod_repay
+#         saving_account.loan += loan
+#         saving_account.interest += interest
+#         saving_account.commod += commod
 
-        saving_account.save()
+#         saving_account.save()
 
-        messages.success(request, 'Saving account successfully updated or created.')
-        form = SavingDepositForm()  # Reset the form after saving
-    else:
-        form = SavingDepositForm()
+#         messages.success(request, 'Saving account successfully updated or created.')
+#         form = SavingDepositForm()  # Reset the form after saving
+#     else:
+#         form = SavingDepositForm()
 
-    return render(request, 'savings/savings_form.html', {'form': form, 'title': "Save"})
+#     return render(request, 'savings/savings_form.html', {'form': form, 'title': "Save"})
+
+
+    
+# def saving_deposit(request):
+#     if request.method == 'POST':
+#         owner_id = request.POST.get('owner')
+#         payment_type = request.POST.get('payment_type')
+
+#         try:
+#             saving_account = SavingAccount.objects.get(owner_id=owner_id, payment_type=payment_type)
+#         except SavingAccount.DoesNotExist:
+#             saving_account = SavingAccount(owner_id=owner_id, payment_type=payment_type)
+
+#         # Fetch values from the form, default to 0 if none provided
+#         received = float(request.POST.get('received', 0))
+#         normal_savings = float(request.POST.get('normal_savings', 0))
+#         divine_touch = float(request.POST.get('divine_touch', 0))
+#         sp_sav = float(request.POST.get('sp_sav', 0))
+#         rss = float(request.POST.get('rss', 0))
+#         loan_repay = float(request.POST.get('loan_repay', 0))
+#         interest_repay = float(request.POST.get('interest_repay', 0))
+#         commod_repay = float(request.POST.get('commod_repay', 0))
+#         loan = float(request.POST.get('loan', 0))
+#         interest = float(request.POST.get('interest', 0))
+#         commod = float(request.POST.get('commod', 0))
+#         share = float(request.POST.get('share', 0))  # Add share field
+
+#         # Set the received value directly, without adding to the existing value
+#         saving_account.received = received
+
+#         # Update saving account fields
+#         saving_account.normal_savings += normal_savings
+#         saving_account.divine_touch += divine_touch
+#         saving_account.sp_sav += sp_sav
+#         saving_account.rss += rss
+#         saving_account.loan_repay += loan_repay
+#         saving_account.interest_repay += interest_repay
+#         saving_account.commod_repay += commod_repay
+#         saving_account.loan += loan
+#         saving_account.interest += interest
+#         saving_account.commod += commod
+#         saving_account.share += share  # Update share
+
+#         saving_account.save()
+
+#         messages.success(request, 'Saving account successfully updated or created.')
+#         form = SavingDepositForm()  # Reset the form after saving
+#     else:
+#         form = SavingDepositForm()
+
+#     return render(request, 'savings/savings_form.html', {'form': form, 'title': "Save"})
+
+# this is old version of the views
+
+# def saving_deposit(request):
+#     if request.method == 'POST':
+#         owner_id = request.POST.get('owner')
+#         payment_type = request.POST.get('payment_type')
+
+#         try:
+#             saving_account = SavingAccount.objects.get(owner_id=owner_id, payment_type=payment_type)
+#         except SavingAccount.DoesNotExist:
+#             saving_account = SavingAccount(owner_id=owner_id, payment_type=payment_type)
+
+#         # Fetch values from the form, default to 0 if none provided
+#         received = float(request.POST.get('received', 0))
+#         normal_savings = float(request.POST.get('normal_savings', 0))
+#         divine_touch = float(request.POST.get('divine_touch', 0))
+#         sp_sav = float(request.POST.get('sp_sav', 0))
+#         rss = float(request.POST.get('rss', 0))
+#         loan_repay = float(request.POST.get('loan_repay', 0))
+#         interest_repay = float(request.POST.get('interest_repay', 0))
+#         commod_repay = float(request.POST.get('commod_repay', 0))
+#         loan = float(request.POST.get('loan', 0))
+#         interest = float(request.POST.get('interest', 0))
+#         commod = float(request.POST.get('commod', 0))
+
+#         # Update saving account fields
+#         saving_account.received += received
+#         saving_account.normal_savings += normal_savings
+#         saving_account.divine_touch += divine_touch
+#         saving_account.sp_sav += sp_sav
+#         saving_account.rss += rss
+#         saving_account.loan_repay += loan_repay
+#         saving_account.interest_repay += interest_repay
+#         saving_account.commod_repay += commod_repay
+#         saving_account.loan += loan
+#         saving_account.interest += interest
+#         saving_account.commod += commod
+
+#         saving_account.save()
+
+#         messages.success(request, 'Saving account successfully updated or created.')
+#         form = SavingDepositForm()  # Reset the form after saving
+#     else:
+#         form = SavingDepositForm()
+
+#     return render(request, 'savings/savings_form.html', {'form': form, 'title': "Save"})
 
 
 
@@ -114,6 +212,7 @@ def saving_deposit(request):
         loan = float(request.POST.get('loan', 0))
         interest = float(request.POST.get('interest', 0))
         commod = float(request.POST.get('commod', 0))
+        share = float(request.POST.get('share', 0))  # Add share field
 
         # Set the received value directly, without adding to the existing value
         saving_account.received = received
@@ -129,6 +228,7 @@ def saving_deposit(request):
         saving_account.loan += loan
         saving_account.interest += interest
         saving_account.commod += commod
+        saving_account.share += share  # Update share
 
         saving_account.save()
 
@@ -138,8 +238,6 @@ def saving_deposit(request):
         form = SavingDepositForm()
 
     return render(request, 'savings/savings_form.html', {'form': form, 'title': "Save"})
-
-
 
 
 def edit_saving_account(request):

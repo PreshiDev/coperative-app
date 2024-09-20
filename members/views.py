@@ -205,6 +205,10 @@ def MemberDashboardView(request):
     divine_touch_sum = savings.aggregate(Sum('divine_touch'))['divine_touch__sum']
     sp_sav_sum = savings.aggregate(Sum('sp_sav'))['sp_sav__sum']
     rss_sum = savings.aggregate(Sum('rss'))['rss__sum']
+    shares = savings.aggregate(Sum('share'))['share__sum']
+
+    # Get the full name of the logged-in user
+    full_name = f"{request.user.first_name} {request.user.last_name}"
 
     context = {
         'transactions': sorted_savings,
@@ -216,19 +220,22 @@ def MemberDashboardView(request):
         'divine_touch_sum': divine_touch_sum,
         'sp_sav_sum': sp_sav_sum,
         'rss_sum': rss_sum,
+        'shares': shares,
         'member': request.user,
+        'full_name': full_name,
         'title': "My Savings & Loans",
     }
 
     return render(request, template, context)
 
-
     
 
 def Dashboard(request):
     template = 'members/dashboard.html'
-
-    return render(request, template)
+    context = {
+        'member': request.user,
+    }
+    return render(request, template, context)
 
 
 def home(request):

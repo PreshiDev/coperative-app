@@ -30,14 +30,14 @@
         </div>
 
         <div class="form-group">
-            <label for="balance">Balance</label>
+            <label for="balance">Add Previous Savings Balance(optional)</label>
             {% render_field form.balance class="form-control" %}
         </div>
 
-        <!-- <div class="form-group">
-            <label for="loan_balance">Loan Balance</label>
-            {% render_field form.loan_balance class="form-control" %}
-        </div> -->
+        <div class="form-group">
+            <label for="share">shares</label>
+            {% render_field form.share class="form-control" %}
+        </div>
 
         <div class="form-group">
             <label for="divine_touch">Divine Touch</label>
@@ -55,23 +55,33 @@
         </div>
 
         <div class="form-group">
-            <label for="loan">Loan</label>
+            <label for="loan">New Loan</label>
             {% render_field form.loan class="form-control" %}
         </div>
 
         <div class="form-group">
-            <label for="interest">Interest</label>
+            <label for="interest">New Interest</label>
             {% render_field form.interest class="form-control" %}
         </div>
 
         <div class="form-group">
-            <label for="commod">Commodity</label>
+            <label for="commod">New Commodity</label>
             {% render_field form.commod class="form-control" %}
         </div>
 
         <div class="form-group">
             <label for="loan_repay">Loan Repay</label>
             {% render_field form.loan_repay class="form-control" %}
+        </div>
+
+        <div class="form-group">
+            <label for="interest_repay">Interest Repay</label>
+            {% render_field form.interest_repay class="form-control" %}
+        </div>
+
+        <div class="form-group">
+            <label for="commod_repay">Commodity Repay</label>
+            {% render_field form.commod_repay class="form-control" %}
         </div>
 
         <div class="form-group">

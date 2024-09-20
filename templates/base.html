@@ -21,6 +21,55 @@
 	
     </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a></div>
     
+
+        <!-- Profile Modal -->
+        <div class="modal fade"  class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="profileModalLabel">User Profile</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-center mb-4">
+                            {% if member.image %}
+                                <img src="{{ member.image.url }}" alt="Profile Picture" class="img-fluid rounded-circle" style="width: 120px; height: 120px;">
+                            {% endif %}
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-0"><strong>Full Name:</strong> {{ member.first_name }} {{ member.last_name }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-0"><strong>Membership Number:</strong> {{ member.mem_number }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-0"><strong>Address:</strong> {{ member.address }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-0"><strong>Contact:</strong> {{ member.contact }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-0"><strong>Account Status:</strong> {{ member.get_status_display }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-0"><strong>Date Created:</strong> {{ member.date_created|date:"d M Y" }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-0"><strong>Last Updated:</strong> {{ member.date_updated|date:"d M Y" }}</p>
+                            </div>
+                        </div>
+                        <a hx-get="{% url 'members:edit_account' %}" hx-target="#modalBody" data-toggle="modal" data-target="#exampleModal" class="btn btn-primary d-block text-white mx-auto">Edit Profile</a>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                      </div>
+                </div>
+            </div>
+        </div>
+        
     <!-- Modal -->
     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">

@@ -32,9 +32,9 @@ class SavingDepositForm(forms.ModelForm):
         model = SavingAccount
         fields = [
             'owner', 'payment_type', 'received', 'normal_savings', 
-            'balance', 'divine_touch', 
-            'sp_sav', 'rss', 'loan_repay', 'interest_repay', 'commod_repay',
-            'loan', 'interest', 'commod',  # New fields to add to the respective models
+            'balance', 'divine_touch', 'sp_sav', 'rss', 'loan_repay', 
+            'interest_repay', 'commod_repay', 'loan', 'interest', 
+            'commod', 'share',  # Add the new 'share' field here
             'month', 'year'
         ]
         widgets = {
@@ -49,6 +49,7 @@ class SavingDepositForm(forms.ModelForm):
             'loan': forms.NumberInput(),
             'interest': forms.NumberInput(),
             'commod': forms.NumberInput(),
+            'share': forms.NumberInput(),  # Add widget for 'share' field
             'loan_repay': forms.NumberInput(),
             'interest_repay': forms.NumberInput(),
             'commod_repay': forms.NumberInput(),
@@ -81,8 +82,9 @@ class SavingAccountEditForm(forms.ModelForm):
         model = SavingAccount
         fields = [
             'owner', 'payment_type', 'month', 'year', 
-            'received', 'normal_savings', 'balance', 'divine_touch', 'sp_sav', 'rss',
-            'loan', 'interest', 'commod', 'loan_repay'
+            'received', 'normal_savings', 'balance', 'divine_touch', 
+            'sp_sav', 'rss', 'loan', 'interest', 'commod', 'loan_repay', 
+            'share'  # Add the new 'share' field here
         ]
         widgets = {
             'owner': Select2Widget(),
@@ -95,6 +97,7 @@ class SavingAccountEditForm(forms.ModelForm):
             'divine_touch': forms.NumberInput(attrs={'class': 'form-control'}),
             'sp_sav': forms.NumberInput(attrs={'class': 'form-control'}),
             'rss': forms.NumberInput(attrs={'class': 'form-control'}),
+            'share': forms.NumberInput(attrs={'class': 'form-control'}),  # Add widget for 'share' field
             'loan': forms.NumberInput(attrs={'class': 'form-control'}),
             'interest': forms.NumberInput(attrs={'class': 'form-control'}),
             'commod': forms.NumberInput(attrs={'class': 'form-control'}),
