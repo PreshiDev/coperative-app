@@ -5,7 +5,7 @@ from django.contrib.auth.hashers import make_password
 class MembershipAccountForm(forms.ModelForm):
     class Meta:
         model = Member
-        fields = ['username', 'first_name', 'last_name', 'other_name', 'address', 'contact', 'image', 'password']
+        fields = ['username', 'email', 'first_name', 'last_name', 'other_name', 'address', 'contact', 'image', 'password']
 
     def save(self, commit=True):
         member = super(MembershipAccountForm, self).save(commit=False)
@@ -58,7 +58,7 @@ class ReplyForm(forms.ModelForm):
 class MembershipAccountEditForm(forms.ModelForm):
     class Meta:
         model = Member
-        fields = ['username', 'first_name', 'last_name', 'other_name', 'address', 'contact', 'password', 'image']
+        fields = ['username', 'first_name', 'last_name', 'other_name', 'email', 'address', 'contact', 'password', 'image']
         widgets = {
             'password': forms.PasswordInput(),  # Use PasswordInput to hide password text
         }
@@ -68,7 +68,7 @@ class MembershipAccountEditForm(forms.ModelForm):
         # Make the fields readonly
         self.fields['first_name'].widget.attrs['readonly'] = True
         self.fields['last_name'].widget.attrs['readonly'] = True
-        self.fields['other_name'].widget.attrs['readonly'] = True
+        self.fields['other_name'].widget.attrs['readonly'] = False
 
     def clean_password(self):
         password = self.cleaned_data.get('password')
@@ -82,7 +82,7 @@ class MembershipAccountEditForm(forms.ModelForm):
 class StaffAccountEditForm(forms.ModelForm):
     class Meta:
         model = Member
-        fields = ['username', 'first_name', 'last_name', 'other_name', 'address', 'contact', 'password', 'image', 'is_staff', 'is_superuser']
+        fields = ['username', 'first_name', 'last_name', 'other_name', 'email', 'address', 'contact', 'password', 'image', 'is_staff', 'is_superuser']
         widgets = {
             'password': forms.PasswordInput(),  # Hide password input
         }

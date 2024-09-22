@@ -24,11 +24,11 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 SECRET_KEY = 'l+bt#3_^!w36012^3bczo$k&s^h^9)!fd5yh$70he$@@1$4_#9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-ALLOWED_HOSTS = ['sangocoop.com.ng', 'https://www.sangocoop.com.ng', '127.0.0.1']
+ALLOWED_HOSTS = ['sangocoop.com.ng', '127.0.0.1']
 
 STATICFILES_DIRS = [
         os.path.join(BASE_DIR,'static')
@@ -103,24 +103,24 @@ WSGI_APPLICATION = 'cooperative_finance.wsgi.application'
 # }
 
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'rilhkbcy_sangocoop',
-#         'USER': 'rilhkbcy_sangocoop',
-#         'PASSWORD': 'MoneyPower@6000',
-#         'HOST': 'localhost',  # Or your database host
-#         'PORT': '3306',  # Default port for MySQL
-#     }
-# }
-
-
-DATABASES = {  
+DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'rilhkbcy_sangocoop',
+        'USER': 'rilhkbcy_sangocoop',
+        'PASSWORD': 'MoneyPower@6000',
+        'HOST': 'localhost',  # Or your database host
+        'PORT': '3306',  # Default port for MySQL
     }
 }
+
+
+# DATABASES = {  
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
 
 
 # Password validation
@@ -176,3 +176,16 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 import dj_database_url
 db_from_env = dj_database_url.config()
 DATABASES['default'].update(db_from_env)
+
+
+
+# settings.py
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'sangocoop2@gmail.com'  # Your email address
+EMAIL_HOST_PASSWORD = 'bttc xupm xeyy kbwk'  # Your email password

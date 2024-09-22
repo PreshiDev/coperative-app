@@ -7,14 +7,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>Cooperative Finance</title>
     <meta name="description" content="Cooperative Finance description">
+    <link rel="icon" href="/static/assets/img/custom/sangocoop-logo.jpeg" type="image/x-icon" />
     <link rel="stylesheet" href="{% static 'assets/bootstrap/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
     <link rel="stylesheet" href="{% static 'assets/fonts/fontawesome-all.min.css' %}">
+
+    <style>
+        .logo-container {
+            position: absolute;
+            top: 10px; /* Adjust the vertical positioning */
+            left: 10px; /* Aligns the logo and text to the right */
+            z-index: 1000; /* Ensures it appears on top of other elements */
+        }
+
+        .logo {
+            width: 50px;  /* Adjust size to your preference */
+            height: 50px;
+            object-fit: cover; /* Ensures the logo scales properly */
+        }
+
+        .logo-text {
+            font-size: 1.2rem; /* Adjust text size */
+            font-weight: bold;
+            color: #000; /* Adjust text color based on your theme */
+        }
+    </style>
     <script src="https://unpkg.com/htmx.org@1.9.2"></script>
 </head>
 
 <body id="page-top">
-    
+
+    <!-- Logo at the top-right corner -->
+    <div class="logo-container d-flex align-items-center">
+        <img src="/static/assets/img/custom/sangocoop-logo.jpeg" alt="Logo" class="logo rounded-circle" />
+        <span class="logo-text mx-2 d-none d-md-block">SangoCoop</span>
+    </div>
 	    {% block content %}
             
 	    {% endblock %}

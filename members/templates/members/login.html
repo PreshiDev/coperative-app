@@ -19,6 +19,10 @@
                                 <label for="password" class="form-label">Password</label>
                                 <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
                             </div>
+                            <!-- Forgot Password link -->
+                            <div class="mb-3">
+                                <a href="{% url 'password_reset' %}" class="text-decoration-none">Forgot your password?</a>
+                            </div>
                             <!-- Show Password Checkbox -->
                             <div class="mb-3 form-check">
                                 <input type="checkbox" class="form-check-input" id="showPassword" onclick="togglePassword()">

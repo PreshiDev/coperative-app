@@ -13,27 +13,39 @@
                         <form method="post" enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="mb-3">
+                                <label for="id_username">Username</label>
                                 {% render_field form.username class="form-control" placeholder="Enter your username" %}
                             </div>
                             <div class="mb-3">
+                                <label for="id_email">Email</label>
+                                {% render_field form.email class="form-control" placeholder="Enter your email" %}
+                            </div>
+                            <div class="mb-3">
+                                <label for="id_first_name">First Name</label>
                                 {% render_field form.first_name class="form-control" placeholder="Enter your first name" %}
                             </div>
                             <div class="mb-3">
+                                <label for="id_last_name">Last Name</label>
                                 {% render_field form.last_name class="form-control" placeholder="Enter your last name" %}
                             </div>
                             <div class="mb-3">
-                                {% render_field form.other_name class="form-control" placeholder="Enter your Other name" %}
+                                <label for="id_other_name">Other Name</label>
+                                {% render_field form.other_name class="form-control" placeholder="Enter your other name" %}
                             </div>
                             <div class="mb-3">
+                                <label for="id_address">Address</label>
                                 {% render_field form.address class="form-control" placeholder="Enter your address" %}
                             </div>
                             <div class="mb-3">
+                                <label for="id_contact">Contact</label>
                                 {% render_field form.contact class="form-control" placeholder="Enter your contact number" %}
                             </div>
                             <div class="mb-3">
+                                <label for="id_password">Password</label>
                                 {% render_field form.password class="form-control" placeholder="Enter your password" %}
                             </div>
                             <div class="mb-3">
+                                <label for="id_image">Profile Image</label>
                                 {% render_field form.image class="form-control" %}
                             </div>
                             <button type="submit" class="btn btn-primary w-100">Sign Up</button>
