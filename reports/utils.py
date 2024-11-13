@@ -26,10 +26,8 @@ def generate_excel(savings):
     for row_num, saving in enumerate(savings, start=2):
         worksheet[f'A{row_num}'] = saving.get_month_display()
         worksheet[f'B{row_num}'] = f'{saving.owner.first_name} {saving.owner.last_name}'
-        worksheet[f'C{row_num}'] = saving.payment_type
-        worksheet[f'D{row_num}'] = saving.normal_savings
+        worksheet[f'D{row_num}'] = saving.savings
         worksheet[f'E{row_num}'] = saving.divine_touch
-        worksheet[f'F{row_num}'] = saving.sp_sav
         worksheet[f'G{row_num}'] = saving.rss
         worksheet[f'H{row_num}'] = saving.loan_repay
         worksheet[f'I{row_num}'] = saving.loan

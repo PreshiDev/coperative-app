@@ -1,15 +1,37 @@
 {% extends 'base.html' %}
 {% load static %}
+<style>
+    @media (max-width: 768px) { /* Adjust according to your design */
+    #wrapper {
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width on mobile */
+        height: 100vh; /* Full height */
+        z-index: 999; /* Ensure it is above other content */
+        transition: all 0.3s ease;
+    }
+    .sidebar .nav {
+        display: flex;
+        flex-direction: column;
+        padding: 0; /* Reset padding if needed */
+    }
+}
+</style>
 
 {% block content %}
 <div id="wrapper">
     <nav class="navbar navbar-dark align-items-start sidebar sidebar-dark accordion bg-gradient-primary p-0">
         <div class="container-fluid d-flex flex-column p-0">
             <a class="navbar-brand d-flex justify-content-center align-items-center sidebar-brand m-0" href="/">
-                <div class="sidebar-brand-icon rotate-n-15">
+                <!-- <div class="sidebar-brand-icon rotate-n-15">
                     <img src="/static/assets/img/custom/sangocoop-logo.jpeg" alt="Logo" class="logo rounded-circle invisible" />
                 </div>
-                <div class="sidebar-brand-text mx-3 invisible"><span>SangoCoop</span></div>
+                <div class="sidebar-brand-text mx-3 invisible"><span>SangoCoop</span></div> -->
             </a>
             <hr class="sidebar-divider my-0">
 
@@ -115,6 +137,7 @@
             </nav>
             <div id="dynamic-content">
                 <!-- Initial content can be placed here, or it can be empty to be filled by HTMX later -->
+                {% include "../static_pages/home.html" %}
             </div>
         </div>
         </nav>
@@ -147,5 +170,19 @@
 
     // You can call markNotificationsAsRead() when notifications are clicked or viewed
     document.getElementById('notificationIcon').addEventListener('click', markNotificationsAsRead);
+</script>
+
+<script>
+    document.getElementById('sidebarToggle').addEventListener('click', function() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('active'); // This 'active' class can control visibility
+
+    if (sidebar.classList.contains('active')) {
+        sidebar.style.width = '100%'; // Ensure full width when active
+    } else {
+        sidebar.style.width = ''; // Reset or set to initial value
+    }
+});
+
 </script>
 {% endblock %}

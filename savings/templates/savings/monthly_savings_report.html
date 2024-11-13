@@ -10,7 +10,6 @@
       <th scope="col">#</th>
       <th scope="col">Month</th>
       <th scope="col">Name</th>
-      <th scope="col">Payment Type</th>
       <th scope="col">Savings</th>
       <th scope="col">Divine Touch</th>
       <th scope="col">SP SAV</th>
@@ -33,24 +32,12 @@
         <td>{{ transaction.loan_repay }}</td>
         <td>{{ transaction.interest }}</td>
         <td>{{ transaction.commod }}</td>
-        <td>
-          {{ transaction.received }}
-          {% if 'Teller' in transaction.received_source and 'Oracle' in transaction.received_source %}
-            <span class="badge badge-success">Both</span>
-          {% elif 'Teller' in transaction.received_source %}
-            <span class="badge badge-primary">Teller</span>
-          {% elif 'Oracle' in transaction.received_source %}
-            <span class="badge badge-warning">Oracle</span>
-          {% endif %}
-        </td>
       </tr>
     {% endfor %}
 
     <tr>
-      <th scope="row">Total</th>
       <td></td>
       <td></td>
-      <td>{{ transactions_sum }}</td>
       <td></td>
       <td></td>
       <td></td>

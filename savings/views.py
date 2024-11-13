@@ -188,69 +188,73 @@ def saving_account(request):
 #     return render(request, 'savings/savings_form.html', {'form': form, 'title': "Save"})
 
 
+import logging
 
-    
+logger = logging.getLogger(__name__)
+
 def saving_deposit(request):
+    saving_account = None
+
     if request.method == 'POST':
         owner_id = request.POST.get('owner')
-        payment_type = request.POST.get('payment_type')
+        
+        if not owner_id:
+            messages.error(request, 'No owner selected.')
+            return redirect('savings:saving_deposit')
 
         try:
-            saving_account = SavingAccount.objects.get(owner_id=owner_id, payment_type=payment_type)
+            saving_account = SavingAccount.objects.get(owner_id=owner_id)
         except SavingAccount.DoesNotExist:
-            saving_account = SavingAccount(owner_id=owner_id, payment_type=payment_type)
+            messages.error(request, 'Saving account does not exist for the selected owner.')
+            return redirect('savings:saving_deposit')
 
-        # Fetch values from the form, default to 0 if none provided
-        received = float(request.POST.get('received', 0))
-        normal_savings = float(request.POST.get('normal_savings', 0))
-        divine_touch = float(request.POST.get('divine_touch', 0))
-        sp_sav = float(request.POST.get('sp_sav', 0))
-        rss = float(request.POST.get('rss', 0))
-        loan_repay = float(request.POST.get('loan_repay', 0))
-        interest_repay = float(request.POST.get('interest_repay', 0))
-        commod_repay = float(request.POST.get('commod_repay', 0))
-        loan = float(request.POST.get('loan', 0))
-        interest = float(request.POST.get('interest', 0))
-        commod = float(request.POST.get('commod', 0))
-        share = float(request.POST.get('share', 0))  # Add share field
+        form = SavingDepositForm(request.POST, instance=saving_account)
+        
+        if form.is_valid():
+            cleaned_data = form.cleaned_data
 
-        # Set the received value directly, without adding to the existing value
-        saving_account.received = received
+            # Set 'received' directly
+            saving_account.received = float(request.POST.get('received', 0))
 
-        # Update saving account fields
-        saving_account.normal_savings += normal_savings
-        saving_account.divine_touch += divine_touch
-        saving_account.sp_sav += sp_sav
-        saving_account.rss += rss
-        saving_account.loan_repay += loan_repay
-        saving_account.interest_repay += interest_repay
-        saving_account.commod_repay += commod_repay
-        saving_account.loan += loan
-        saving_account.interest += interest
-        saving_account.commod += commod
-        saving_account.share += share  # Update share
-
-        saving_account.save()
-
-        messages.success(request, 'Saving account successfully updated or created.')
-        form = SavingDepositForm()  # Reset the form after saving
+            # Update balance fields based on cleaned_data
+            saving_account.savings_balance = cleaned_data['savings_balance']
+            saving_account.divine_touch_balance = cleaned_data['divine_touch_balance']
+            saving_account.rss_balance = cleaned_data['rss_balance']
+            saving_account.share_balance = cleaned_data['share_balance']
+            
+            # Update loan, interest, and commodity balances based on repayment fields
+            saving_account.loan_balance = max(
+                0, saving_account.loan_balance + cleaned_data.get('loan', 0) - cleaned_data.get('loan_repay', 0)
+            )
+            saving_account.interest_balance = max(
+                0, saving_account.interest_balance + cleaned_data.get('interest', 0) - cleaned_data.get('interest_repay', 0)
+            )
+            saving_account.commodity_balance = max(
+                0, saving_account.commodity_balance + cleaned_data.get('commod', 0) - cleaned_data.get('commod_repay', 0)
+            )
+            
+            saving_account.save()
+            messages.success(request, 'Saving account successfully updated.')
+            form = SavingDepositForm()  # Clear the form after saving
+        else:
+            messages.error(request, 'There were errors in the form. Please correct them.')
     else:
         form = SavingDepositForm()
 
     return render(request, 'savings/savings_form.html', {'form': form, 'title': "Save"})
 
 
+
 def edit_saving_account(request):
     saving_account = None
 
-    if 'owner' in request.GET and 'payment_type' in request.GET and 'month' in request.GET and 'year' in request.GET:
+    if 'owner' in request.GET and 'month' in request.GET and 'year' in request.GET:
         owner = request.GET.get('owner')
-        payment_type = request.GET.get('payment_type')
         month = request.GET.get('month')
         year = request.GET.get('year')
 
         # Get the existing saving account instance
-        saving_account = get_object_or_404(SavingAccount, owner_id=owner, payment_type=payment_type, month=month, year=year)
+        saving_account = get_object_or_404(SavingAccount, owner_id=owner, month=month, year=year)
 
     if request.method == 'POST':
         form = SavingAccountEditForm(request.POST, instance=saving_account)
@@ -263,16 +267,23 @@ def edit_saving_account(request):
 
     return render(request, 'savings/edit_saving_account.html', {'form': form, 'title': "Edit Saving Account"})
 
-
+from django.urls import reverse
+from django.http import HttpResponseNotAllowed
 
 def delete_transaction(request, pk):
     transaction = get_object_or_404(SavingAccount, pk=pk)
 
     if request.method == 'POST':
         transaction.delete()
-        messages.success(request, 'Transaction Record successfully deleted.')
+        messages.success(request, 'Transaction record successfully deleted.')
+        return redirect(reverse('savings:transaction_list'))  # Update 'savings:transaction_list' with your redirect path
 
-    return render(request, 'savings/transaction_confirm_delete.html', {'transaction': transaction})
+    elif request.method == 'GET':
+        # Display the confirmation page
+        return render(request, 'savings/transaction_confirm_delete.html', {'transaction': transaction})
+    
+    # Reject other HTTP methods
+    return HttpResponseNotAllowed(['POST', 'GET'])
 
 
 
@@ -325,34 +336,22 @@ def saving_withdrawal(request, **kwargs):
 
 
 
+from django.db.models import Sum
+
 def saving_deposit_transactions(request):
     template = 'savings/savings_transactions.html'
-
-    # Fetch all saving accounts (regardless of payment_type)
     savings = SavingAccount.objects.filter(owner__is_staff=False, owner__is_superuser=False)
-    
-    # Aggregate the total received amount across all accounts
-    savings_sum = savings.aggregate(Sum('received'))['received__sum']
-
-    # Sort transactions by owner's last name and first name
     sorted_savings = savings.order_by('owner__last_name', 'owner__first_name')
-
-    # Calculate combined received amount for users with both Teller and Oracle records
-    combined_savings = {}
-    for saving in sorted_savings:
-        key = saving.owner_id
-        if key not in combined_savings:
-            combined_savings[key] = saving
-        else:
-            combined_savings[key].received += saving.received
+    savings_sum = savings.aggregate(Sum('received'))['received__sum'] or 0
 
     context = {
-        'transactions': combined_savings.values(),
+        'transactions': sorted_savings,
         'transactions_sum': savings_sum,
-        'title': "Deposit",
+        'title': "Deposit Transactions",
     }
 
     return render(request, template, context)
+
 
 
 
@@ -410,15 +409,21 @@ def generate_excel_savings(savings, filename):
     headers = [
         'Month',
         'Owner',
-        'Payment Type',
-        'Normal Savings',
+        'Received',
+        'Savings',
         'Divine Touch',
-        'SP SAV',
         'RSS',
-        'Loan Repay',
+        'Shares',
+        'Loan',
         'Interest',
-        'Commod',
-        'Received'
+        'Commodity',
+        'Savings Balance',
+        'Divine Touch Balance',
+        'Shares Balance',
+        'Rss Balance',
+        'Loan Balance',
+        'Interest Balance',
+        'Commodity Balance'
     ]
     sheet.append(headers)
 
@@ -426,15 +431,21 @@ def generate_excel_savings(savings, filename):
         sheet.append([
             saving.get_month_display(),
             f"{saving.owner.first_name} {saving.owner.last_name}",
-            saving.payment_type,
-            saving.normal_savings,
+            saving.received,
+            saving.savings,
             saving.divine_touch,
-            saving.sp_sav,
             saving.rss,
-            saving.loan_repay,
+            savings.share,
+            saving.loan,
             saving.interest,
             saving.commod,
-            saving.received,
+            savings.savings_balance,
+            savings.divine_touch_balance,
+            savings.share_balance,
+            savings.rss_balance,
+            savings.loan_balance,
+            savings.interest_balance,
+            savings.commodity_balance
         ])
 
     for column in sheet.columns:

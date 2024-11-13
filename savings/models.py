@@ -32,61 +32,36 @@ MONTH_CHOICES = [
 YEAR_CHOICES = [(r, r) for r in range(2000, datetime.date.today().year+1)]
 
 
-
 class SavingAccount(models.Model):
     owner = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='saving_accounts')
-    payment_type = models.CharField(choices=SAVING_TYPE_CHOICES, max_length=6, default='Oracle')
     received = models.PositiveIntegerField(default=0)
-    normal_savings = models.PositiveIntegerField(default=0)
-    balance = models.PositiveIntegerField(default=0)
+    
+    # Existing fields
+    savings = models.PositiveIntegerField(default=0)
     divine_touch = models.PositiveIntegerField(default=0)
-    sp_sav = models.PositiveIntegerField(default=0)
     rss = models.PositiveIntegerField(default=0)
     loan_repay = models.PositiveIntegerField(default=0)
     interest_repay = models.PositiveIntegerField(default=0)
     commod_repay = models.PositiveIntegerField(default=0)
-    loan = models.PositiveIntegerField(default=0)  # New field for loan addition
-    interest = models.PositiveIntegerField(default=0)  # New field for interest addition
-    commod = models.PositiveIntegerField(default=0)  # New field for commodity addition
-    share = models.PositiveIntegerField(default=0)  # New field for shares
+    loan = models.PositiveIntegerField(default=0)
+    interest = models.PositiveIntegerField(default=0)
+    commod = models.PositiveIntegerField(default=0)
+    share = models.PositiveIntegerField(default=0)
+    
+    # New balance fields
+    savings_balance = models.PositiveIntegerField(default=0)
+    interest_balance = models.PositiveIntegerField(default=0)
+    loan_balance = models.PositiveIntegerField(default=0)
+    commodity_balance = models.PositiveIntegerField(default=0)
+    rss_balance = models.PositiveIntegerField(default=0)
+    divine_touch_balance = models.PositiveIntegerField(default=0)
+    share_balance = models.PositiveIntegerField(default=0)
+    
     month = models.IntegerField(choices=MONTH_CHOICES, default=datetime.date.today().month)
     year = models.IntegerField(choices=YEAR_CHOICES, default=datetime.date.today().year)
     status = models.CharField(choices=ACCOUNT_STATUS_CHOICE, default='Activated', max_length=11)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
-
-    def save(self, *args, **kwargs):
-        # Fetch existing instance if it exists
-        if self.pk:
-            existing_instance = SavingAccount.objects.get(pk=self.pk)
-
-        # Process accounts (loan, interest, commodity) in a DRY manner
-        def process_account(account, value_field, repay_field, balance_field):
-            if account:
-                if getattr(self, value_field) > 0:
-                    setattr(account, balance_field, getattr(account, balance_field) + getattr(self, value_field))
-                if getattr(self, repay_field) > 0:
-                    setattr(account, balance_field, getattr(account, balance_field) - getattr(self, repay_field))
-                    setattr(account, balance_field, max(getattr(account, balance_field), 0))  # Ensure no negative balance
-                account.save()
-
-        # Loan account processing
-        loan_account = self.owner.loan_accounts.first()
-        process_account(loan_account, 'loan', 'loan_repay', 'loan_balance')
-
-        # Interest account processing
-        interest_account = self.owner.interest_accounts.first()
-        process_account(interest_account, 'interest', 'interest_repay', 'interest_balance')
-
-        # Commodity account processing
-        commodity_account = self.owner.commodity_accounts.first()
-        process_account(commodity_account, 'commod', 'commod_repay', 'commod_balance')
-
-        # Add normal_savings to balance
-        self.balance += self.normal_savings
-
-        # Call the parent save method to complete the save process
-        super(SavingAccount, self).save(*args, **kwargs)
 
 
 

@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from accounting.models import Income,Expense
 from loans.models import LoanPayment,LoanIssue,LoansIssue, LoanAccount
 from shares.models import ShareBuy,ShareSell
@@ -6,6 +6,8 @@ from savings.models import SavingDeposit,SavingWithdrawal, SavingAccount
 from django.db.models import Sum
 from datetime import datetime
 from django.http import HttpResponse
+from django.contrib import messages
+from django.http import HttpResponseForbidden
 # import datetime
 
 from reports.utils import generate_pdf, generate_excel  # Assume these utility functions are defined
@@ -274,3 +276,21 @@ def yearly(request):
     }
 
     return render(request, template, context)
+
+
+def delete_transaction(request, transaction_id):
+    if request.method == 'POST':
+        # Get the transaction or show 404 if it doesn't exist
+        transaction = get_object_or_404(SavingAccount, pk=transaction_id)
+        
+        # Check for additional permissions if needed
+        if not request.user.has_perm('savings.delete_savingaccount'):
+            return HttpResponseForbidden("You don't have permission to delete this record.")
+        
+        transaction.delete()
+        messages.success(request, 'Record deleted successfully.')
+
+        # Redirect back to the monthly report page
+        return redirect('reports:monthly')
+    
+    return HttpResponseForbidden("Invalid request method.")

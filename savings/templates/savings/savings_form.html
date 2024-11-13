@@ -9,81 +9,81 @@
       hx-swap="innerHTML">
         {% csrf_token %}
 
+        <!-- Owner Selection -->
         <div class="form-group">
             <label for="owner">Select User</label>
             {% render_field form.owner class="form-control" %}
         </div>
 
-        <div class="form-group">
-            <label for="payment_type">Payment Type</label>
-            {% render_field form.payment_type class="form-control" %}
-        </div>
-
-        <div class="form-group">
+         <!-- Received Selection -->
+         <div class="form-group">
             <label for="received">Received</label>
-            {% render_field form.received class="form-control" %}
+            {% render_field form.received class="form-control formatted-number" %}
         </div>
 
+        <!-- Savings Field with Adjustments -->
         <div class="form-group">
-            <label for="normal_savings">Normal Savings</label>
-            {% render_field form.normal_savings class="form-control" %}
+            <label for="add_savings">Add Savings</label>
+            {% render_field form.add_savings class="form-control formatted-number" %}
+            <label for="subtract_savings">Subtract Savings</label>
+            {% render_field form.subtract_savings class="form-control formatted-number" %}
         </div>
 
+        <!-- Divine Touch Field with Adjustments -->
         <div class="form-group">
-            <label for="balance">Add Previous Savings Balance(optional)</label>
-            {% render_field form.balance class="form-control" %}
+            <label for="add_divine_touch">Add Divine Touch</label>
+            {% render_field form.add_divine_touch class="form-control formatted-number" %}
+            <label for="subtract_divine_touch">Subtract Divine Touch</label>
+            {% render_field form.subtract_divine_touch class="form-control formatted-number" %}
         </div>
 
+        <!-- RSS Field with Adjustments -->
         <div class="form-group">
-            <label for="share">shares</label>
-            {% render_field form.share class="form-control" %}
+            <label for="add_rss">Add RSS</label>
+            {% render_field form.add_rss class="form-control formatted-number" %}
+            <label for="subtract_rss">Subtract RSS</label>
+            {% render_field form.subtract_rss class="form-control formatted-number" %}
         </div>
 
+        <!-- Share Field with Adjustments -->
         <div class="form-group">
-            <label for="divine_touch">Divine Touch</label>
-            {% render_field form.divine_touch class="form-control" %}
-        </div>
-
-        <div class="form-group">
-            <label for="sp_sav">SP Savings</label>
-            {% render_field form.sp_sav class="form-control" %}
-        </div>
-
-        <div class="form-group">
-            <label for="rss">RSS</label>
-            {% render_field form.rss class="form-control" %}
+            <label for="add_share">Add Share</label>
+            {% render_field form.add_share class="form-control formatted-number" %}
+            <label for="subtract_share">Subtract Share</label>
+            {% render_field form.subtract_share class="form-control formatted-number" %}
         </div>
 
         <div class="form-group">
             <label for="loan">New Loan</label>
-            {% render_field form.loan class="form-control" %}
+            {% render_field form.loan class="form-control formatted-number" %}
         </div>
 
         <div class="form-group">
             <label for="interest">New Interest</label>
-            {% render_field form.interest class="form-control" %}
+            {% render_field form.interest class="form-control formatted-number" %}
         </div>
 
         <div class="form-group">
             <label for="commod">New Commodity</label>
-            {% render_field form.commod class="form-control" %}
+            {% render_field form.commod class="form-control formatted-number" %}
         </div>
 
         <div class="form-group">
             <label for="loan_repay">Loan Repay</label>
-            {% render_field form.loan_repay class="form-control" %}
+            {% render_field form.loan_repay class="form-control formatted-number" %}
         </div>
 
         <div class="form-group">
             <label for="interest_repay">Interest Repay</label>
-            {% render_field form.interest_repay class="form-control" %}
+            {% render_field form.interest_repay class="form-control formatted-number" %}
         </div>
 
         <div class="form-group">
             <label for="commod_repay">Commodity Repay</label>
-            {% render_field form.commod_repay class="form-control" %}
+            {% render_field form.commod_repay class="form-control formatted-number" %}
         </div>
 
+        <!-- Month and Year Selection -->
         <div class="form-group">
             <label for="month">Month</label>
             {% render_field form.month class="form-control" %}
@@ -94,10 +94,12 @@
             {% render_field form.year class="form-control" %}
         </div>
 
+        <!-- Submit Button -->
         <div class="form-group text-center">
             <input type="submit" value="{{ title }}" class="btn btn-primary btn-lg" />
         </div>
 
+        <!-- Display Messages -->
         {% if messages %}
             <div class="alert alert-info">
                 {% for message in messages %}
@@ -108,43 +110,33 @@
     </form>
 </div>
 
+<!-- JavaScript for thousands separator -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Select all elements with the class "formatted-number"
+    const numberInputs = document.querySelectorAll(".formatted-number");
 
+    // Function to format the number with commas as thousands separators
+    function formatNumberWithCommas(value) {
+        return value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
 
-<script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function () {
-        const formatNumber = (n) => {
-            return n.replace(/\D/g, "")  // Remove non-numeric characters
-                     .replace(/\B(?=(\d{3})+(?!\d))/g, ",");  // Add commas every 3 digits
-        };
+    numberInputs.forEach(input => {
+        // Initial formatting on page load if there is already a value
+        input.value = formatNumberWithCommas(input.value.replace(/,/g, ''));
 
-        const fields = ['received', 'normal_savings', 'balance', 'divine_touch', 'sp_sav', 'rss', 'loan', 'interest', 'commod', 'loan_repay', 'interest_repay', 'commod_repay'];
-
-        fields.forEach(function (field) {
-            const input = document.getElementById('id_' + field);
-
-            if (input) {
-                // Ensure commas are added as the user types
-                input.addEventListener('input', function (e) {
-                    // Get the caret position before formatting
-                    let caretPosition = input.selectionStart;
-
-                    // Remove commas and format the number
-                    let value = e.target.value.replace(/,/g, '');  // Remove any existing commas
-                    e.target.value = formatNumber(value);  // Format the number with commas
-
-                    // Adjust the caret position after adding commas
-                    let newCaretPosition = Math.max(caretPosition - (value.length - e.target.value.length), 0);
-                    input.setSelectionRange(newCaretPosition, newCaretPosition);
-                });
-
-                // Ensure that if the form is pre-filled, the number is formatted correctly
-                if (input.value) {
-                    let initialValue = input.value.replace(/,/g, '');  // Remove commas in case of pre-filled value
-                    input.value = formatNumber(initialValue);  // Add commas to the initial value
-                }
+        input.addEventListener("input", function(e) {
+            // Remove existing commas
+            let value = e.target.value.replace(/,/g, '');
+            
+            // Ensure input is a valid number
+            if (!isNaN(value) && value !== '') {
+                // Format the number with commas and set the formatted value
+                e.target.value = formatNumberWithCommas(value);
             }
         });
     });
+});
 </script>
 
 {% endblock %}

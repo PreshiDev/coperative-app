@@ -173,60 +173,87 @@ def member_detail(request, mem_number):
 
 
 
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
+from django.shortcuts import render
+import logging
 
-@login_required
+logger = logging.getLogger(__name__)
+
+
+@login_required     
 def MemberDashboardView(request):
     template = 'members/members_dashboard.html'
 
-    # Fetch all saving accounts for the logged-in user
-    savings = SavingAccount.objects.filter(owner=request.user)
+    try:
+        # Start debug
+        print("Starting MemberDashboardView for user:", request.user)
+        logger.debug("Starting MemberDashboardView for user: %s", request.user)
 
-    # Aggregate the total received amount for the user
-    savings_sum = savings.aggregate(Sum('balance'))['balance__sum']
+        # Query savings
+        savings = SavingAccount.objects.filter(owner=request.user)
+        print("Savings queryset:", savings)
+        logger.debug("Savings queryset: %s", savings)
 
-    # Sort transactions by date
-    sorted_savings = savings.order_by('-date_created')
+        # Order and aggregate savings
+        sorted_savings = savings.order_by('-date_created')
+        savings_sum = savings.aggregate(Sum('received'))['received__sum'] or 0
+        print("Sorted savings:", sorted_savings)
+        print("Savings sum:", savings_sum)
+        logger.debug("Sorted savings: %s", sorted_savings)
+        logger.debug("Savings sum: %s", savings_sum)
 
-    # Helper function to get balance from an account model
-    def get_balance(account_class, user, balance_field):
-        accounts = account_class.objects.filter(owner=user)
-        if accounts.exists():
-            balance_sum = accounts.aggregate(Sum(balance_field))[f'{balance_field}__sum']
-            return balance_sum if balance_sum is not None else 0
-        return 0  # Return 0 if no account found
+        # Check individual balances
+        savings_balance = savings.aggregate(Sum('savings_balance'))['savings_balance__sum'] or 0
+        interest_balance = savings.aggregate(Sum('interest_balance'))['interest_balance__sum'] or 0
+        loan_balance = savings.aggregate(Sum('loan_balance'))['loan_balance__sum'] or 0
+        commodity_balance = savings.aggregate(Sum('commodity_balance'))['commodity_balance__sum'] or 0
+        rss_balance = savings.aggregate(Sum('rss_balance'))['rss_balance__sum'] or 0
+        divine_touch_balance = savings.aggregate(Sum('divine_touch_balance'))['divine_touch_balance__sum'] or 0
+        share_balance = savings.aggregate(Sum('share_balance'))['share_balance__sum'] or 0
 
-    # Fetch the loan, interest, and commodity balances for the logged-in user
-    loan_balance = get_balance(LoanAccount, request.user, 'loan_balance')
-    interest_balance = get_balance(InterestAccount, request.user, 'interest_balance')
-    commod_balance = get_balance(CommodityAccount, request.user, 'commod_balance')
+        # Print all balances to debug
+        print("Balances:", {
+            'savings_balance': savings_balance,
+            'interest_balance': interest_balance,
+            'loan_balance': loan_balance,
+            'commodity_balance': commodity_balance,
+            'rss_balance': rss_balance,
+            'divine_touch_balance': divine_touch_balance,
+            'share_balance': share_balance,
+        })
 
-    # Fetch the balance fields from the SavingAccount model
-    balance_sum = savings.aggregate(Sum('balance'))['balance__sum']
-    divine_touch_sum = savings.aggregate(Sum('divine_touch'))['divine_touch__sum']
-    sp_sav_sum = savings.aggregate(Sum('sp_sav'))['sp_sav__sum']
-    rss_sum = savings.aggregate(Sum('rss'))['rss__sum']
-    shares = savings.aggregate(Sum('share'))['share__sum']
+        # Full name for the user
+        full_name = f"{request.user.first_name} {request.user.last_name}"
+        print("User's full name:", full_name)
+        logger.debug("User's full name: %s", full_name)
 
-    # Get the full name of the logged-in user
-    full_name = f"{request.user.first_name} {request.user.last_name}"
+        # Context for the template
+        context = {
+            'transactions': sorted_savings,
+            'transactions_sum': savings_sum,
+            'savings_balance': savings_balance,
+            'interest_balance': interest_balance,
+            'loan_balance': loan_balance,
+            'commodity_balance': commodity_balance,
+            'rss_balance': rss_balance,
+            'divine_touch_balance': divine_touch_balance,
+            'share_balance': share_balance,
+            'full_name': full_name,
+            'title': "My Savings & Loans",
+        }
 
-    context = {
-        'transactions': sorted_savings,
-        'transactions_sum': savings_sum,
-        'loan_balance': loan_balance,
-        'interest_balance': interest_balance,
-        'commod_balance': commod_balance,
-        'balance_sum': balance_sum,
-        'divine_touch_sum': divine_touch_sum,
-        'sp_sav_sum': sp_sav_sum,
-        'rss_sum': rss_sum,
-        'shares': shares,
-        'member': request.user,
-        'full_name': full_name,
-        'title': "My Savings & Loans",
-    }
+        # Render the template with context
+        return render(request, template, context)
 
-    return render(request, template, context)
+    except Exception as e:
+        # Log the exact error
+        print("Error in MemberDashboardView:", e)
+        logger.error("Error in MemberDashboardView: %s", e)
+        # Optionally, return an error template
+        return render(request, 'error_template.html', {"error": str(e)})
+
+
 
     
 
