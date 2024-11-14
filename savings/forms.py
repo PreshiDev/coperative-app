@@ -95,7 +95,6 @@ class SavingDepositForm(forms.ModelForm):
         return cleaned_data
 
 
-
 class SavingAccountEditForm(forms.ModelForm):
     class Meta:
         model = SavingAccount

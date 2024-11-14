@@ -8,6 +8,7 @@ from datetime import datetime
 from django.http import HttpResponse
 from django.contrib import messages
 from django.http import HttpResponseForbidden
+
 # import datetime
 
 from reports.utils import generate_pdf, generate_excel  # Assume these utility functions are defined
@@ -277,20 +278,40 @@ def yearly(request):
 
     return render(request, template, context)
 
+# This view below is the previous view that uses HttpResponseForbidden to display error message which works, but i do not want to use messages to display success message anymore
+
+# def delete_transaction(request, transaction_id):
+#     if request.method == 'POST':
+#         # Fetch the transaction record or return 404 if it doesn't exist
+#         transaction = get_object_or_404(SavingAccount, pk=transaction_id)
+        
+#         # Verify that the user has the required permission to delete a transaction
+#         if not request.user.has_perm('savings.delete_savingaccount'):
+#             return HttpResponseForbidden("You don't have permission to delete this record.")
+        
+#         # Delete the transaction only
+#         transaction.delete()
+#         messages.success(request, 'Record deleted successfully.')
+
+#         # Redirect to the monthly report page
+#         return redirect('reports:monthly')
+    
+#     return HttpResponseForbidden("Invalid request method.")
+
 
 def delete_transaction(request, transaction_id):
     if request.method == 'POST':
-        # Get the transaction or show 404 if it doesn't exist
+        # Fetch the transaction record or return 404 if it doesn't exist
         transaction = get_object_or_404(SavingAccount, pk=transaction_id)
         
-        # Check for additional permissions if needed
+        # Verify that the user has the required permission to delete a transaction
         if not request.user.has_perm('savings.delete_savingaccount'):
-            return HttpResponseForbidden("You don't have permission to delete this record.")
+            return HttpResponse("You don't have permission to delete this record.", status=403)
         
+        # Delete the transaction only
         transaction.delete()
-        messages.success(request, 'Record deleted successfully.')
-
-        # Redirect back to the monthly report page
-        return redirect('reports:monthly')
+        
+        # Return an HttpResponse with the success message
+        return HttpResponse("Record deleted successfully.")
     
-    return HttpResponseForbidden("Invalid request method.")
+    return HttpResponse("Invalid request method.", status=403)

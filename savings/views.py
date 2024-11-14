@@ -202,12 +202,12 @@ def saving_deposit(request):
             messages.error(request, 'No owner selected.')
             return redirect('savings:saving_deposit')
 
-        try:
-            saving_account = SavingAccount.objects.get(owner_id=owner_id)
-        except SavingAccount.DoesNotExist:
-            messages.error(request, 'Saving account does not exist for the selected owner.')
-            return redirect('savings:saving_deposit')
+        # Get or create a new SavingAccount
+        saving_account, created = SavingAccount.objects.get_or_create(owner_id=owner_id)
+        if created:
+            messages.success(request, 'New saving account created for the selected owner.')
 
+        # Process form data
         form = SavingDepositForm(request.POST, instance=saving_account)
         
         if form.is_valid():
@@ -216,12 +216,26 @@ def saving_deposit(request):
             # Set 'received' directly
             saving_account.received = float(request.POST.get('received', 0))
 
-            # Update balance fields based on cleaned_data
+            # Update balance fields using add/subtract fields
             saving_account.savings_balance = cleaned_data['savings_balance']
             saving_account.divine_touch_balance = cleaned_data['divine_touch_balance']
             saving_account.rss_balance = cleaned_data['rss_balance']
             saving_account.share_balance = cleaned_data['share_balance']
-            
+
+            # Store the last entered values for the add/subtract fields
+            # Update main fields based on add/subtract inputs without accumulating
+            if cleaned_data.get('add_savings') or cleaned_data.get('subtract_savings'):
+                saving_account.savings = cleaned_data.get('add_savings', 0) - cleaned_data.get('subtract_savings', 0)
+
+            if cleaned_data.get('add_divine_touch') or cleaned_data.get('subtract_divine_touch'):
+                saving_account.divine_touch = cleaned_data.get('add_divine_touch', 0) - cleaned_data.get('subtract_divine_touch', 0)
+
+            if cleaned_data.get('add_rss') or cleaned_data.get('subtract_rss'):
+                saving_account.rss = cleaned_data.get('add_rss', 0) - cleaned_data.get('subtract_rss', 0)
+
+            if cleaned_data.get('add_share') or cleaned_data.get('subtract_share'):
+                saving_account.share = cleaned_data.get('add_share', 0) - cleaned_data.get('subtract_share', 0)
+
             # Update loan, interest, and commodity balances based on repayment fields
             saving_account.loan_balance = max(
                 0, saving_account.loan_balance + cleaned_data.get('loan', 0) - cleaned_data.get('loan_repay', 0)
