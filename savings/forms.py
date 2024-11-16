@@ -26,16 +26,20 @@ class SavingAccountForm(forms.ModelForm):
         }
 
 
+from django.forms.utils import pretty_name
+from django.utils.safestring import mark_safe
+from django.contrib.humanize.templatetags.humanize import intcomma
+
 class SavingDepositForm(forms.ModelForm):
     # Fields to add/subtract values
-    add_savings = forms.FloatField(required=False, initial=0)
-    subtract_savings = forms.FloatField(required=False, initial=0)
-    add_divine_touch = forms.FloatField(required=False, initial=0)
-    subtract_divine_touch = forms.FloatField(required=False, initial=0)
-    add_rss = forms.FloatField(required=False, initial=0)
-    subtract_rss = forms.FloatField(required=False, initial=0)
-    add_share = forms.FloatField(required=False, initial=0)
-    subtract_share = forms.FloatField(required=False, initial=0)
+    add_savings = forms.CharField(required=False, initial='0', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    subtract_savings = forms.CharField(required=False, initial='0', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    add_divine_touch = forms.CharField(required=False, initial='0', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    subtract_divine_touch = forms.CharField(required=False, initial='0', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    add_rss = forms.CharField(required=False, initial='0', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    subtract_rss = forms.CharField(required=False, initial='0', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    add_share = forms.CharField(required=False, initial='0', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    subtract_share = forms.CharField(required=False, initial='0', widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     class Meta:
         model = SavingAccount
@@ -45,13 +49,13 @@ class SavingDepositForm(forms.ModelForm):
         ]
         widgets = {
             'owner': Select2Widget(),
-            'received': forms.NumberInput(attrs={'class': 'form-control'}),
-            'loan': forms.NumberInput(),
-            'interest': forms.NumberInput(),
-            'commod': forms.NumberInput(),
-            'loan_repay': forms.NumberInput(),
-            'interest_repay': forms.NumberInput(),
-            'commod_repay': forms.NumberInput(),
+            'received': forms.TextInput(attrs={'class': 'form-control'}),  # Change to TextInput
+            'loan': forms.TextInput(attrs={'class': 'form-control'}),  # Change to TextInput
+            'interest': forms.TextInput(attrs={'class': 'form-control'}),  # Change to TextInput
+            'commod': forms.TextInput(attrs={'class': 'form-control'}),  # Change to TextInput
+            'loan_repay': forms.TextInput(attrs={'class': 'form-control'}),  # Change to TextInput
+            'interest_repay': forms.TextInput(attrs={'class': 'form-control'}),  # Change to TextInput
+            'commod_repay': forms.TextInput(attrs={'class': 'form-control'}),  # Change to TextInput
             'month': forms.Select(attrs={'class': 'form-control'}),
             'year': forms.Select(attrs={'class': 'form-control'}),
         }
@@ -65,32 +69,57 @@ class SavingDepositForm(forms.ModelForm):
         )
         self.fields['owner'].label_from_instance = self.get_display_name
 
+        # Preformat initial values with intcomma
+        for field_name, field in self.fields.items():
+            if field_name in ['received', 'loan', 'interest', 'commod', 'loan_repay', 'interest_repay', 'commod_repay']:
+                if self.initial.get(field_name) is not None:
+                    self.initial[field_name] = intcomma(self.initial[field_name])
+
     def get_display_name(self, obj):
         # Format as "Last Name, First Name"
         return f"{obj.last_name} {obj.first_name}"
-    
+
     def clean(self):
         cleaned_data = super().clean()
 
-        # Update balance fields by adding the values from add/subtract inputs to the current instance balance
-        cleaned_data['savings_balance'] = (
-            self.instance.savings_balance + cleaned_data.get('add_savings', 0) - cleaned_data.get('subtract_savings', 0)
-        )
-        cleaned_data['divine_touch_balance'] = (
-            self.instance.divine_touch_balance + cleaned_data.get('add_divine_touch', 0) - cleaned_data.get('subtract_divine_touch', 0)
-        )
-        cleaned_data['rss_balance'] = (
-            self.instance.rss_balance + cleaned_data.get('add_rss', 0) - cleaned_data.get('subtract_rss', 0)
-        )
-        cleaned_data['share_balance'] = (
-            self.instance.share_balance + cleaned_data.get('add_share', 0) - cleaned_data.get('subtract_share', 0)
-        )
+        # Fields to clean (those that could contain commas)
+        fields_to_clean = [
+            'received', 'loan', 'interest', 'commod',
+            'loan_repay', 'interest_repay', 'commod_repay',
+            'add_savings', 'subtract_savings',
+            'add_divine_touch', 'subtract_divine_touch',
+            'add_rss', 'subtract_rss',
+            'add_share', 'subtract_share'
+        ]
 
-        # Ensure no negative values in balance fields
-        for field in ['savings_balance', 'divine_touch_balance', 'rss_balance', 'share_balance',
-                    'loan_balance', 'interest_balance', 'commodity_balance']:
-            if cleaned_data.get(field, 0) < 0:
-                self.add_error(field, f"{field.replace('_', ' ').capitalize()} cannot be negative.")
+        for field in fields_to_clean:
+            value = cleaned_data.get(field)
+            if value is not None and isinstance(value, str):
+                try:
+                    # Remove commas and convert to float
+                    cleaned_data[field] = float(value.replace(',', ''))
+                except ValueError:
+                    self.add_error(field, f"Invalid format for {field}. Please enter a numeric value.")
+
+        # Compute balances and validate them
+        balance_fields = [
+            ('savings_balance', 'add_savings', 'subtract_savings'),
+            ('divine_touch_balance', 'add_divine_touch', 'subtract_divine_touch'),
+            ('rss_balance', 'add_rss', 'subtract_rss'),
+            ('share_balance', 'add_share', 'subtract_share')
+        ]
+
+        for balance_field, add_field, subtract_field in balance_fields:
+            balance = (
+                self.instance.__dict__.get(balance_field, 0) +
+                cleaned_data.get(add_field, 0) -
+                cleaned_data.get(subtract_field, 0)
+            )
+            cleaned_data[balance_field] = balance
+
+            # Validate that balances are not negative
+            if balance < 0:
+                self.add_error(balance_field, f"{balance_field.replace('_', ' ').capitalize()} cannot be negative.")
 
         return cleaned_data
 

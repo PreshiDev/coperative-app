@@ -214,7 +214,7 @@ def saving_deposit(request):
             cleaned_data = form.cleaned_data
 
             # Set 'received' directly
-            saving_account.received = float(request.POST.get('received', 0))
+            saving_account.received = int(request.POST.get('received', '0').replace(',', '').strip() or 0)
 
             # Update balance fields using add/subtract fields
             saving_account.savings_balance = cleaned_data['savings_balance']
@@ -251,6 +251,7 @@ def saving_deposit(request):
             messages.success(request, 'Saving account successfully updated.')
             form = SavingDepositForm()  # Clear the form after saving
         else:
+            print(form.errors)  # Add this line to log errors
             messages.error(request, 'There were errors in the form. Please correct them.')
     else:
         form = SavingDepositForm()
