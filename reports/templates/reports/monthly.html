@@ -116,7 +116,7 @@
                         <td>₦{{ saving.loan_balance|intcomma }}</td>
                         <td>₦{{ saving.interest_balance|intcomma }}</td>
                         <td>₦{{ saving.commodity_balance|intcomma }}</td>
-                        <td>{{ saving.get_month_display|intcomma }}</td>
+                        <td>{{ saving.get_month_display }}</td>
                         <td>{{ saving.year }}</td>
                         <td>
                             {% if saving.pk %}
@@ -150,24 +150,24 @@
             <div class="card mb-3">
                 <div class="card-header font-weight-bold">{{ saving.owner }}</div>
                 <div class="card-body">
-                    <p><strong>Received:</strong>₦{{ saving.received }}</p>
-                    <p><strong>Savings:</strong>₦{{ saving.savings }}</p>
-                    <p><strong>Divine Touch:</strong>₦{{ saving.divine_touch }}</p>
-                    <p><strong>RSS:</strong>₦{{ saving.rss }}</p>
-                    <p><strong>Shares:</strong>₦{{ saving.share }}</p>
-                    <p><strong>Loan:</strong>₦{{ saving.loan }}</p>
-                    <p><strong>Interest:</strong>₦{{ saving.interest }}</p>
-                    <p><strong>Commodity:</strong>₦{{ saving.commod }}</p>
-                    <p><strong>Loan Repay:</strong>₦{{ saving.loan_repay }}</p>
-                    <p><strong>Interest Repay:</strong>₦{{ saving.interest_repay }}</p>
-                    <p><strong>Commodity Repay:</strong>₦{{ saving.commod_repay }}</p>
-                    <p><strong>Savings Balance:</strong>₦{{ saving.savings_balance }}</p>
-                    <p><strong>Divine-Touch Balance:</strong>₦{{ saving.divine_touch_balance }}</p>
-                    <p><strong>RSS Balance:</strong>₦{{ saving.rss_balance }}</p>
-                    <p><strong>Share Balance:</strong>₦{{ saving.share_balance }}</p>
-                    <p><strong>Loan Balance:</strong>₦{{ saving.loan_balance }}</p>
-                    <p><strong>Interest Balance:</strong>₦{{ saving.interest_balance }}</p>
-                    <p><strong>Commodity Balance:</strong>₦{{ saving.commodity_balance }}</p>
+                    <p><strong>Received:</strong>₦{{ saving.received|intcomma }}</p>
+                    <p><strong>Savings:</strong>₦{{ saving.savings|intcomma }}</p>
+                    <p><strong>Divine Touch:</strong>₦{{ saving.divine_touch|intcomma }}</p>
+                    <p><strong>RSS:</strong>₦{{ saving.rss|intcomma }}</p>
+                    <p><strong>Shares:</strong>₦{{ saving.share|intcomma }}</p>
+                    <p><strong>Loan:</strong>₦{{ saving.loan|intcomma }}</p>
+                    <p><strong>Interest:</strong>₦{{ saving.interest|intcomma }}</p>
+                    <p><strong>Commodity:</strong>₦{{ saving.commod|intcomma }}</p>
+                    <p><strong>Loan Repay:</strong>₦{{ saving.loan_repay|intcomma }}</p>
+                    <p><strong>Interest Repay:</strong>₦{{ saving.interest_repay|intcomma }}</p>
+                    <p><strong>Commodity Repay:</strong>₦{{ saving.commod_repay|intcomma }}</p>
+                    <p><strong>Savings Balance:</strong>₦{{ saving.savings_balance|intcomma }}</p>
+                    <p><strong>Divine-Touch Balance:</strong>₦{{ saving.divine_touch_balance|intcomma }}</p>
+                    <p><strong>RSS Balance:</strong>₦{{ saving.rss_balance|intcomma }}</p>
+                    <p><strong>Share Balance:</strong>₦{{ saving.share_balance|intcomma }}</p>
+                    <p><strong>Loan Balance:</strong>₦{{ saving.loan_balance|intcomma }}</p>
+                    <p><strong>Interest Balance:</strong>₦{{ saving.interest_balance|intcomma }}</p>
+                    <p><strong>Commodity Balance:</strong>₦{{ saving.commodity_balance|intcomma }}</p>
                     <p><strong>Month:</strong> {{ saving.get_month_display }}</p>
                     <p><strong>Year:</strong> {{ saving.year }}</p>
                 </div>
