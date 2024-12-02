@@ -1,0 +1,61 @@
+<div class="container mt-4">
+    <!-- Instructions Section -->
+    <div class="alert alert-info d-flex align-items-center mb-4">
+      <i class="bi bi-info-circle me-2 fs-5"></i>
+      <div>
+        <strong>Instructions:</strong> Before uploading, download the Excel template using the button below, fill it out with the required data, and then upload the completed file.
+      </div>
+    </div>
+  
+    <!-- Form Section -->
+    <form method="POST" hx-post="{% url 'savings:upload_savings' %}" enctype="multipart/form-data" hx-target="#dynamic-content" class="form-group shadow p-4 bg-white rounded">
+      {% csrf_token %}
+  
+      <!-- Month Selection -->
+      <div class="mb-3">
+        <label for="month" class="form-label">Select Month:</label>
+        <select name="month" class="form-control" required>
+          <option value="">-- Select Month --</option>
+          {% for value, name in months %}
+            <option value="{{ value }}" {% if value == current_month %}selected{% endif %}>{{ name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+  
+      <!-- Year Selection -->
+      <div class="mb-3">
+        <label for="year" class="form-label">Select Year:</label>
+        <select name="year" class="form-control" required>
+          <option value="">-- Select Year --</option>
+          {% for year in years %}
+            <option value="{{ year }}" {% if year == current_year %}selected{% endif %}>{{ year }}</option>
+          {% endfor %}
+        </select>
+      </div>
+  
+      <!-- File Upload -->
+      <div class="mb-4">
+        <label for="file" class="form-label fw-semibold">Upload Excel File</label>
+        <input type="file" name="file" id="file" class="form-control" required>
+        <small class="text-muted">Ensure the file is in the correct format as per the template.</small>
+      </div>
+  
+      <!-- Submit and Download Buttons -->
+      <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+        <button type="submit" class="btn btn-primary px-4">Upload</button>
+        <a href="{% url 'savings:download_template' %}" class="btn btn-success px-4">
+          <i class="bi bi-download me-1"></i>Download Template
+        </a>
+      </div>
+    </form>
+  
+    <!-- Display Messages -->
+    {% if messages %}
+      <div class="alert alert-info mt-4">
+        {% for message in messages %}
+          <p>{{ message }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+  

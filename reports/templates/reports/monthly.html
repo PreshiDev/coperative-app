@@ -4,62 +4,74 @@
 <div class="container mt-4">
     <h2>Monthly Report</h2>
 
-    <!-- Form for generating report -->
-    <form method="post" hx-post="{% url 'reports:monthly' %}" hx-target="#dynamic-content">
-        {% csrf_token %}
-        <div class="row">
-            <div class="col-12 col-md-6 mb-3">
-                <label for="month">Select Month Record To Be Generated</label>
-                <select class="form-control" id="month" name="month">
-                    {% for month_num, month_name in MONTH_CHOICES %}
-                        <option value="{{ month_num }}" {% if month_num == selected_month %}selected{% endif %}>
-                            {{ month_name }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-12 col-md-6 mb-3">
-                <label for="year">Year</label>
-                <select class="form-control" id="year" name="year">
-                    {% for year_value, year_display in YEAR_CHOICES %}
-                        <option value="{{ year_value }}" {% if year_value == selected_year %}selected{% endif %}>
-                            {{ year_display }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title text-primary">Generate Report</h5>
+            <form method="post" hx-post="{% url 'reports:monthly' %}" hx-target="#dynamic-content">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="month">Select Month Record To Be Generated</label>
+                        <select class="form-control" id="month" name="month">
+                            {% for month_num, month_name in MONTH_CHOICES %}
+                                <option value="{{ month_num }}" {% if month_num == selected_month %}selected{% endif %}>
+                                    {{ month_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="year">Year</label>
+                        <select class="form-control" id="year" name="year">
+                            {% for year_value, year_display in YEAR_CHOICES %}
+                                <option value="{{ year_value }}" {% if year_value == selected_year %}selected{% endif %}>
+                                    {{ year_display }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Generate Report</button>
+            </form>
         </div>
-        <button type="submit" class="btn btn-primary mt-2">Generate Report</button>
-    </form>
+    </div>
 
-    <!-- Separate form for downloading PDF/Excel -->
-    <form method="post" action="{% url 'reports:monthly' %}" target="_blank" class="mt-4">
-        {% csrf_token %}
-        <div class="row">
-            <div class="col-12 col-md-6 mb-3">
-                <label for="month">Select Month Record To Be Downloaded</label>
-                <select class="form-control" id="month" name="month">
-                    {% for month_num, month_name in MONTH_CHOICES %}
-                        <option value="{{ month_num }}" {% if month_num == selected_month %}selected{% endif %}>
-                            {{ month_name }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-12 col-md-6 mb-3">
-                <label for="year">Year</label>
-                <select class="form-control" id="year" name="year">
-                    {% for year_value, year_display in YEAR_CHOICES %}
-                        <option value="{{ year_value }}" {% if year_value == selected_year %}selected{% endif %}>
-                            {{ year_display }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
+
+     <!-- Separate Card for Download Options -->
+     <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title text-primary">Download Report</h5>
+            <form method="post" action="{% url 'reports:monthly' %}" target="_blank">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="month">Select Month Record To Be Downloaded</label>
+                        <select class="form-control" id="month" name="month">
+                            {% for month_num, month_name in MONTH_CHOICES %}
+                                <option value="{{ month_num }}" {% if month_num == selected_month %}selected{% endif %}>
+                                    {{ month_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="year">Year</label>
+                        <select class="form-control" id="year" name="year">
+                            {% for year_value, year_display in YEAR_CHOICES %}
+                                <option value="{{ year_value }}" {% if year_value == selected_year %}selected{% endif %}>
+                                    {{ year_display }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <button type="submit" name="download_pdf" class="btn btn-danger mt-2 invisible">Download PDF</button>
+                    <button type="submit" name="download_excel" class="btn btn-success mt-2">Download Excel</button>
+                </div>
+            </form>
         </div>
-        <button type="submit" name="download_pdf" class="btn btn-danger mt-2 invisible">Download PDF</button>
-        <button type="submit" name="download_excel" class="btn btn-success mt-2">Download Excel</button>
-    </form>
+    </div>
 
     <hr>
 
@@ -196,4 +208,6 @@
     </div>
 
 </div>
+
+
 {% endblock %}

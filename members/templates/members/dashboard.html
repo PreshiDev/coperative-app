@@ -5,63 +5,83 @@
     #wrapper {
         width: 100%;
         transition: all 0.3s ease;
-    }
-    .sidebar {
-        position: fixed;
-        left: 0;
-        top: 0;
-        width: 100%; /* Full width on mobile */
-        height: 100vh; /* Full height */
-        z-index: 999; /* Ensure it is above other content */
-        transition: all 0.3s ease;
-    }
-    .sidebar .nav {
-        display: flex;
-        flex-direction: column;
-        padding: 0; /* Reset padding if needed */
-    }
-}
+    }}
 </style>
 
 {% block content %}
-<div id="wrapper">
-    <nav class="navbar navbar-dark align-items-start sidebar sidebar-dark accordion bg-gradient-primary p-0">
-        <div class="container-fluid d-flex flex-column p-0">
-            <a class="navbar-brand d-flex justify-content-center align-items-center sidebar-brand m-0" href="/">
-                <!-- <div class="sidebar-brand-icon rotate-n-15">
-                    <img src="/static/assets/img/custom/sango-coop-logo.jpeg" alt="Logo" class="logo rounded-circle invisible" />
-                </div>
-                <div class="sidebar-brand-text mx-3 invisible"><span>SangoCoop</span></div> -->
-                <div class="sidebar-brand-icon rotate-n-15">
-                    <img src="/static/assets/img/custom/sango-coop-logo.jpeg" alt="Logo" class="logo rounded-circle" />
-                </div>
-            </a>
-            <hr class="sidebar-divider my-0">
+    <nav class="navbar bg-body-tertiary shadow fixed-top">
+        <div class="container-fluid">
+            <img src="/static/assets/img/custom/sango-coop-logo.jpeg" alt="Logo" class="logo rounded-circle me-3" />
+            <span class="navbar-brand mb-0 h1">Sango Coop</span>
+          <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+            <div class="offcanvas-header">
+                <img src="/static/assets/img/custom/sango-coop-logo.jpeg" alt="Logo" class="logo rounded-circle me-3" />
+              <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+              <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
+                <li class="nav-item">
+                  <a class="nav-link active" aria-current="page" hx-get="{% url 'static_pages:home' %}" hx-target="#dynamic-content" data-bs-dismiss="offcanvas"><i class="fas fa-tachometer-alt"> Dashboard</i></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" hx-get="{% url 'savings:saving' %}" hx-target="#dynamic-content" data-bs-dismiss="offcanvas"><i class="fas fa-user"> Operations</i></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" hx-get="{% url 'members:member' %}" hx-target="#dynamic-content" data-bs-dismiss="offcanvas"><i class="fas fa-user-circle"> Members</i></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" hx-get="{% url 'reports:reports' %}" hx-target="#dynamic-content" data-bs-dismiss="offcanvas"><i class="fas fa-exclamation-circle"> Report</i></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" hx-get="{% url 'members:add_staff_member' %}" hx-target="#dynamic-content" data-bs-dismiss="offcanvas"><i class="fas fa-user-plus"> Add Admin</i></a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% if member.image %}
+                        <img src="{{ member.image.url }}" alt="Profile Picture" class="logo rounded-circle" style="width: 120px; height: 120px;">Profile
+                    {% else %}
+                        <img class="logo rounded-circle" src="{% static 'assets/img/avatars/admin_image.jpg' %}">Profile</a>
+                    {% endif %}
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" role="presentation" data-toggle="modal" data-target="#exampleModalLong">
+                                        <i class="fas fa-user fa-sm fa-fw mr-2 text-black"></i>&nbsp; View-Profile
+                                    </a></li>
+                    <li><a class="dropdown-item" hx-get="{% url 'members:staff_edit_account' %}" hx-target="#dynamic-content" data-bs-dismiss="offcanvas"><i class="fas fa-key"> Edit Your Account</i></a></li>
+                    <!-- <li>
+                      <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item" href="#">Something else here</a></li> -->
+                  </ul>
+                </li>
 
-            <ul class="nav navbar-nav text-light" id="accordionSidebar">
-                <li class="nav-item" role="presentation"><a class="nav-link" hx-get="{% url 'static_pages:home' %}" hx-target="#dynamic-content"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
-                <li class="nav-item" role="presentation"><a class="nav-link" hx-get="{% url 'savings:saving' %}" hx-target="#dynamic-content"><i class="fas fa-user"></i><span>Operation</span></a></li>
-                <!-- <li class="nav-item" role="presentation"><a class="nav-link" hx-get="{% url 'loans:loan' %}" hx-target="#dynamic-content"><i class="fas fa-table"></i><span>Loans</span></a></li> -->
-                <!-- <li class="nav-item" role="presentation"><a class="nav-link" hx-get="{% url 'shares:share' %}" hx-target="#dynamic-content"><i class="far fa-user-circle"></i><span>Shares</span></a></li> -->
-                <li class="nav-item" role="presentation"><a class="nav-link" hx-get="{% url 'members:member' %}" hx-target="#dynamic-content"><i class="fas fa-user-circle"></i><span>Members</span></a></li>
-                <li class="nav-item" role="presentation"><a class="nav-link" hx-get="{% url 'reports:reports' %}" hx-target="#dynamic-content"><i class="fas fa-exclamation-circle"></i><span>Reports</span></a></li>
-                <li class="nav-item" role="presentation"><a class="nav-link" hx-get="{% url 'members:staff_edit_account' %}" hx-target="#dynamic-content"><i class="fas fa-key"></i><span>Edit Your Account</span></a></li>
-                <li class="nav-item" role="presentation"><a class="nav-link" hx-get="{% url 'members:add_staff_member' %}" hx-target="#dynamic-content"><i class="fas fa-exclamation-circle"></i><span>Add More Admin</span></a></li>
-            </ul>
-            <div class="text-center d-none d-md-inline"><button class="btn rounded-circle border-0" id="sidebarToggle" type="button"></button></div>
+                <li class="nav-item">
+                    <a class="nav-link" role="presentation" href="{% url 'members:logout' %}"><i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-danger">&nbsp;Logout</i></a>
+                </li>
+              </ul>
+              <!-- <form class="d-flex mt-3" role="search">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+              </form> -->
+            </div>
+          </div>
         </div>
-    </nav>
+      </nav>
+
     <div class="d-flex flex-column" id="content-wrapper">
         <div id="content">
             <nav class="navbar navbar-light navbar-expand bg-white shadow mb-4 topbar static-top">
                 <div class="container-fluid"><button class="btn btn-link d-md-none rounded-circle mr-3" id="sidebarToggleTop" type="button"><i class="fas fa-bars"></i></button>
-                    <form class="form-inline d-none d-sm-inline-block mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+                    <!-- <form class="form-inline d-none d-sm-inline-block mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
                         <div class="input-group"><input class="bg-light form-control border-0 small" type="text" placeholder="Search for ...">
                             <div class="input-group-append"><button class="btn btn-primary py-0" type="button"><i class="fas fa-search"></i></button></div>
                         </div>
-                    </form>
+                    </form> -->
                     <ul class="nav navbar-nav flex-nowrap ml-auto">
-                        <li class="nav-item dropdown d-sm-none no-arrow"><a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false" href="#"><i class="fas fa-search"></i></a>
+                        <!-- <li class="nav-item dropdown d-sm-none no-arrow"><a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false" href="#"><i class="fas fa-search"></i></a>
                             <div class="dropdown-menu dropdown-menu-right p-3 animated--grow-in" role="menu" aria-labelledby="searchDropdown">
                                 <form class="form-inline mr-auto navbar-search w-100">
                                     <div class="input-group"><input class="bg-light form-control border-0 small" type="text" placeholder="Search for ...">
@@ -69,7 +89,7 @@
                                     </div>
                                 </form>
                             </div>
-                        </li>
+                        </li> -->
                         <!-- <li class="nav-item dropdown no-arrow mx-1" role="presentation">
                             <li class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false" href="#"><span class="badge badge-danger badge-counter">3+</span><i class="fas fa-bell fa-fw"></i></a>
                                 <div class="dropdown-menu dropdown-menu-right dropdown-list dropdown-menu-right animated--grow-in"
@@ -101,9 +121,9 @@
                                     </a><a class="text-center dropdown-item small text-gray-500" href="#">Show All Alerts</a></div> -->
                             <!-- </li>
                         </li> --> 
-                        <li class="nav-item dropdown no-arrow mx-1" role="presentation">
+                        <!-- <li class="nav-item dropdown no-arrow mx-1" role="presentation"> -->
                             <!-- inbox part -->
-                            <li class="nav-item dropdown no-arrow">
+                            <!-- <li class="nav-item dropdown no-arrow">
                                 <a id="notificationLink" hx-get="{% url 'members:inbox' %}" hx-target="#modalBody" data-toggle="modal" data-target="#exampleModal" class="dropdown-toggle nav-link">
                                     <i class="fas fa-envelope fa-fw"></i>
                                     <span id="notificationCount" class="badge badge-danger badge-counter">0</span>
@@ -126,15 +146,15 @@
                                     class="dropdown-menu shadow dropdown-menu-right animated--grow-in" role="menu">
                                     <a class="dropdown-item" role="presentation" data-toggle="modal" data-target="#exampleModalLong">
                                         <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>&nbsp;Profile
-                                    </a>
+                                    </a> -->
                                     <!-- <a class="dropdown-item" role="presentation" href="#">
                                         <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>&nbsp;Settings
                                     </a>
                                     <a
                                         class="dropdown-item" role="presentation" href="#"><i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>&nbsp;Activity log</a> -->
-                                        <div class="dropdown-divider"></div><a class="dropdown-item" role="presentation" href="{% url 'members:logout' %}"><i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>&nbsp;Logout</a></div>
-                </li>
-                </li>
+                                        <!-- <div class="dropdown-divider"></div><a class="dropdown-item" role="presentation" href="{% url 'members:logout' %}"><i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>&nbsp;Logout</a></div>
+                        </li>
+                        </li> -->
                     </ul>
                 </div>
             </nav>
@@ -186,6 +206,17 @@
         sidebar.style.width = ''; // Reset or set to initial value
     }
 });
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const toggler = document.querySelector('.navbar-toggler');
+  const collapse = document.querySelector('#navbarCollapse');
+
+  toggler.addEventListener('click', () => {
+    collapse.classList.toggle('show');
+  });
+});
+
 
 </script>
 {% endblock %}

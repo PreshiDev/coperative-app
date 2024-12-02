@@ -2,64 +2,87 @@
 {% load widget_tweaks %}
 
 {% block content %}
-    <div class="container">
-        <div class="row justify-content-center mt-5">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header text-center">
-                        <h3>Add Staff/Superuser</h3>
+    <div class="container my-5 d-flex justify-content-center align-items-center">
+        <div class="card p-4" style="max-width: 600px; border: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); border-radius: 15px;">
+            <div class="text-center mb-4">
+                <h3 style="font-weight: 700; color: #333;">Add Staff/Superuser</h3>
+                <p style="color: #666;">Fill in the details below to add a new staff member or superuser.</p>
+            </div>
+            <div class="card-body">
+                <form method="post" hx-post="{% url 'members:add_staff_member' %}" hx-target="#dynamic-content" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Username Field -->
+                    <div class="mb-3">
+                        {% render_field form.username class="form-control rounded-pill border-0 shadow-sm" placeholder="Enter your username" %}
                     </div>
-                    <div class="card-body">
-                        <form method="post" hx-post="{% url 'members:add_staff_member' %}" hx-target="#dynamic-content" enctype="multipart/form-data">
-                            {% csrf_token %}
-                            <div class="mb-3">
-                                {% render_field form.username class="form-control" placeholder="Enter your username" %}
-                            </div>
-                            <div class="mb-3">
-                                {% render_field form.first_name class="form-control" placeholder="Enter your first name" %}
-                            </div>
-                            <div class="mb-3">
-                                {% render_field form.last_name class="form-control" placeholder="Enter your last name" %}
-                            </div>
-                            <div class="mb-3">
-                                {% render_field form.other_name class="form-control" placeholder="Enter your Other name" %}
-                            </div>
-                            <div class="mb-3">
-                                {% render_field form.email class="form-control" placeholder="Enter your email" %}
-                            </div>
-                            <div class="mb-3">
-                                {% render_field form.address class="form-control" placeholder="Enter your address" %}
-                            </div>
-                            <div class="mb-3">
-                                {% render_field form.contact class="form-control" placeholder="Enter your contact number" %}
-                            </div>
-                            <div class="mb-3">
-                                {% render_field form.password class="form-control" placeholder="Enter your password" %}
-                            </div>
-                            <div class="mb-3">
-                                {% render_field form.image class="form-control" %}
-                            </div>
-                            <div class="mb-3">
-                                {% render_field form.is_staff class="form-check-input" %}
-                                <label class="form-check-label" for="id_is_staff">Staff</label>
-                            </div>
-                            <div class="mb-3">
-                                {% render_field form.is_superuser class="form-check-input" %}
-                                <label class="form-check-label" for="id_is_superuser">Superuser</label>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100">Add Staff/Superuser</button>
-                        </form>
+
+                    <!-- First Name Field -->
+                    <div class="mb-3">
+                        {% render_field form.first_name class="form-control rounded-pill border-0 shadow-sm" placeholder="Enter your first name" %}
                     </div>
-                    <div class="card-footer text-center">
-                        {% if messages %}
-                            <div class="alert alert-success mt-2">
-                                {% for message in messages %}
-                                    {{ message }}
-                                {% endfor %}
-                            </div>
-                        {% endif %}
+
+                    <!-- Last Name Field -->
+                    <div class="mb-3">
+                        {% render_field form.last_name class="form-control rounded-pill border-0 shadow-sm" placeholder="Enter your last name" %}
                     </div>
-                </div>
+
+                    <!-- Other Name Field -->
+                    <div class="mb-3">
+                        {% render_field form.other_name class="form-control rounded-pill border-0 shadow-sm" placeholder="Enter your other name" %}
+                    </div>
+
+                    <!-- Email Field -->
+                    <div class="mb-3">
+                        {% render_field form.email class="form-control rounded-pill border-0 shadow-sm" placeholder="Enter your email" %}
+                    </div>
+
+                    <!-- Address Field -->
+                    <div class="mb-3">
+                        {% render_field form.address class="form-control rounded-pill border-0 shadow-sm" placeholder="Enter your address" %}
+                    </div>
+
+                    <!-- Contact Field -->
+                    <div class="mb-3">
+                        {% render_field form.contact class="form-control rounded-pill border-0 shadow-sm" placeholder="Enter your contact number" %}
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="mb-3">
+                        {% render_field form.password class="form-control rounded-pill border-0 shadow-sm" placeholder="Enter your password" %}
+                    </div>
+
+                    <!-- Image Upload -->
+                    <div class="mb-3">
+                        {% render_field form.image class="form-control rounded-pill border-0 shadow-sm" %}
+                    </div>
+
+                    <!-- Staff Checkbox -->
+                    <div class="form-check mb-3">
+                        {% render_field form.is_staff class="form-check-input" id="id_is_staff" %}
+                        <label class="form-check-label" for="id_is_staff" style="color: #555;">Staff</label>
+                    </div>
+
+                    <!-- Superuser Checkbox -->
+                    <div class="form-check mb-3">
+                        {% render_field form.is_superuser class="form-check-input" id="id_is_superuser" %}
+                        <label class="form-check-label" for="id_is_superuser" style="color: #555;">Superuser</label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill py-2" style="background-color: #0066ff; border: none; font-weight: 600;">Add Staff/Superuser</button>
+                </form>
+            </div>
+
+            <!-- Success Message -->
+            <div class="card-footer text-center">
+                {% if messages %}
+                    <div class="alert alert-success mt-3" style="border-radius: 10px;">
+                        {% for message in messages %}
+                            {{ message }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
