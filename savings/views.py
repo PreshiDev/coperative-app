@@ -1,3 +1,5 @@
+import sys
+import magic
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models import Sum
@@ -18,6 +20,16 @@ from weasyprint import HTML
 from django.contrib.auth.decorators import login_required
 import pandas as pd
 from members.models import Member
+from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+from difflib import get_close_matches
+
+from datetime import datetime
+from dask import dataframe as dd
 # Create your views here.
 
 def saving_account(request):
@@ -43,22 +55,63 @@ def saving_account(request):
 
     return render(request, template, context)
 
+# This is the view for downloading the excel template, which works well,
+# But on the shared hosting the power is too much, i currently saved it just in case,
+# a more powerful hosting plan is gotten.
+
+
+# def download_template(request):
+#     members = Member.objects.filter(is_staff=False, is_superuser=False, is_active=True)
+#     owners_data = [{"Owner Name": f"{member.first_name.strip()} {member.last_name.strip()}"} for member in members]
+
+#     df = pd.DataFrame(owners_data)
+#     # Adding required columns with placeholders
+#     for column in [
+#         'Received', 'Loan', 'Interest', 'Commodity',
+#         'Loan Repay', 'Interest Repay', 'Commodity Repay',
+#         'Add Savings', 'Subtract Savings',
+#         'Add Divine Touch', 'Subtract Divine Touch',
+#         'Add RSS', 'Subtract RSS',
+#         'Add Share', 'Subtract Share'
+#     ]:
+#         df[column] = ''
+
+#     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+#     response['Content-Disposition'] = 'attachment; filename="Savings_Template.xlsx"'
+
+#     with pd.ExcelWriter(response, engine='xlsxwriter') as writer:
+#         df.to_excel(writer, index=False, sheet_name='Savings Template')
+#         workbook = writer.book
+#         worksheet = writer.sheets['Savings Template']
+#         header_format = workbook.add_format({'bold': True, 'text_wrap': True, 'align': 'center'})
+#         for col_num, value in enumerate(df.columns.values):
+#             worksheet.write(0, col_num, value, header_format)
+#             worksheet.set_column(col_num, col_num, 20)
+
+#     return response
+
 
 def download_template(request):
     members = Member.objects.filter(is_staff=False, is_superuser=False, is_active=True)
     owners_data = [{"Owner Name": f"{member.first_name.strip()} {member.last_name.strip()}"} for member in members]
 
-    df = pd.DataFrame(owners_data)
-    # Adding required columns with placeholders
-    for column in [
+    # Create a Dask DataFrame
+    ddf = dd.from_pandas(pd.DataFrame(owners_data), npartitions=1)
+
+    # Add required columns lazily
+    required_columns = [
         'Received', 'Loan', 'Interest', 'Commodity',
         'Loan Repay', 'Interest Repay', 'Commodity Repay',
         'Add Savings', 'Subtract Savings',
         'Add Divine Touch', 'Subtract Divine Touch',
         'Add RSS', 'Subtract RSS',
         'Add Share', 'Subtract Share'
-    ]:
-        df[column] = ''
+    ]
+    for column in required_columns:
+        ddf[column] = ''
+
+    # Compute to convert back to pandas DataFrame
+    df = ddf.compute()
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename="Savings_Template.xlsx"'
@@ -75,15 +128,145 @@ def download_template(request):
     return response
 
 
-from datetime import datetime
-import logging
+# This view below is the previous upload view function which works well,
+# but on the shared hosting service the computation power is too much 
 
-logger = logging.getLogger(__name__)
+# def upload_savings(request):
+#     if request.method == 'POST':
+#         month = request.POST.get('month')
+#         year = request.POST.get('year')
+#         file = request.FILES.get('file')
 
+#         if not month or not year:
+#             messages.error(request, 'Please select both month and year.')
+#             return redirect('savings:upload_savings')
 
-from difflib import get_close_matches
+#         if not file:
+#             messages.error(request, 'No file uploaded.')
+#             return redirect('savings:upload_savings')
 
-from datetime import datetime
+#         try:
+#             df = pd.read_excel(file)
+#         except Exception as e:
+#             messages.error(request, f"Error reading file: {str(e)}")
+#             return redirect('savings:upload_savings')
+
+#         required_columns = [
+#             'Owner Name', 'Received', 'Loan', 'Interest', 'Commodity',
+#             'Loan Repay', 'Interest Repay', 'Commodity Repay',
+#             'Add Savings', 'Subtract Savings',
+#             'Add Divine Touch', 'Subtract Divine Touch',
+#             'Add RSS', 'Subtract RSS',
+#             'Add Share', 'Subtract Share'
+#         ]
+
+#         if not all(column in df.columns for column in required_columns):
+#             missing_columns = [column for column in required_columns if column not in df.columns]
+#             messages.error(request, f"Missing required columns: {', '.join(missing_columns)}")
+#             return redirect('savings:upload_savings')
+
+#         any_errors = False
+#         all_members = Member.objects.filter(is_staff=False, is_superuser=False, is_active=True)
+#         all_member_names = {
+#             f"{member.first_name.strip()} {member.last_name.strip()}": member
+#             for member in all_members
+#         }
+
+#         for index, row in df.iterrows():
+#             owner_name = str(row['Owner Name']).strip()
+#             if not owner_name or owner_name.lower() == 'nan':
+#                 messages.warning(request, f"Empty 'Owner Name' at row {index + 2}, skipping.")
+#                 any_errors = True
+#                 continue
+
+#             member = all_member_names.get(owner_name)
+#             if not member:
+#                 close_matches = get_close_matches(owner_name, all_member_names.keys(), n=1, cutoff=0.6)
+#                 suggestion = f" Did you mean '{close_matches[0]}'?" if close_matches else ""
+#                 messages.warning(request, f"Owner '{owner_name}' not found at row {index + 2}.{suggestion}")
+#                 any_errors = True
+#                 continue
+
+#             try:
+#                 received = int(row['Received']) if pd.notna(row['Received']) else 0
+#                 loan = int(row['Loan']) if pd.notna(row['Loan']) else 0
+#                 interest = int(row['Interest']) if pd.notna(row['Interest']) else 0
+#                 commodity = int(row['Commodity']) if pd.notna(row['Commodity']) else 0
+#                 loan_repay = int(row['Loan Repay']) if pd.notna(row['Loan Repay']) else 0
+#                 interest_repay = int(row['Interest Repay']) if pd.notna(row['Interest Repay']) else 0
+#                 commod_repay = int(row['Commodity Repay']) if pd.notna(row['Commodity Repay']) else 0
+#                 add_savings = int(row['Add Savings']) if pd.notna(row['Add Savings']) else 0
+#                 subtract_savings = int(row['Subtract Savings']) if pd.notna(row['Subtract Savings']) else 0
+#                 add_divine_touch = int(row['Add Divine Touch']) if pd.notna(row['Add Divine Touch']) else 0
+#                 subtract_divine_touch = int(row['Subtract Divine Touch']) if pd.notna(row['Subtract Divine Touch']) else 0
+#                 add_rss = int(row['Add RSS']) if pd.notna(row['Add RSS']) else 0
+#                 subtract_rss = int(row['Subtract RSS']) if pd.notna(row['Subtract RSS']) else 0
+#                 add_share = int(row['Add Share']) if pd.notna(row['Add Share']) else 0
+#                 subtract_share = int(row['Subtract Share']) if pd.notna(row['Subtract Share']) else 0
+
+#                 # Get the previous month's record if it exists
+#                 prev_month = int(month) - 1 if int(month) > 1 else 12
+#                 prev_year = int(year) - 1 if int(month) == 1 else int(year)
+#                 previous_record = SavingAccount.objects.filter(
+#                     owner=member, month=prev_month, year=prev_year
+#                 ).first()
+
+#                 # Use previous record values as base for calculations
+#                 prev_savings = previous_record.savings_balance if previous_record else 0
+#                 prev_divine_touch = previous_record.divine_touch_balance if previous_record else 0
+#                 prev_rss = previous_record.rss_balance if previous_record else 0
+#                 prev_share = previous_record.share_balance if previous_record else 0
+#                 prev_loan = previous_record.loan_balance if previous_record else 0
+#                 prev_interest = previous_record.interest_balance if previous_record else 0
+#                 prev_commodity = previous_record.commodity_balance if previous_record else 0
+
+#                 # Update or create the new record
+#                 saving_account, created = SavingAccount.objects.get_or_create(
+#                     owner=member,
+#                     month=month,
+#                     year=year
+#                 )
+
+#                 saving_account.received = received
+#                 saving_account.savings_balance = prev_savings + add_savings - subtract_savings
+#                 saving_account.divine_touch_balance = prev_divine_touch + add_divine_touch - subtract_divine_touch
+#                 saving_account.rss_balance = prev_rss + add_rss - subtract_rss
+#                 saving_account.share_balance = prev_share + add_share - subtract_share
+
+#                 saving_account.loan_balance = max(0, prev_loan + loan - loan_repay)
+#                 saving_account.interest_balance = max(0, prev_interest + interest - interest_repay)
+#                 saving_account.commodity_balance = max(0, prev_commodity + commodity - commod_repay)
+
+#                 # Reflect individual values directly as Add or Subtract (new logic)
+#                 saving_account.savings = add_savings if add_savings else subtract_savings
+#                 saving_account.rss = add_rss if add_rss else subtract_rss
+#                 saving_account.divine_touch = add_divine_touch if add_divine_touch else subtract_divine_touch
+#                 saving_account.share = add_share if add_share else subtract_share
+
+#                 saving_account.save()
+#             except Exception as e:
+#                 messages.error(request, f"Error processing row {index + 2}: {str(e)}")
+#                 any_errors = True
+
+#         if any_errors:
+#             messages.error(request, "Some rows were not processed successfully. Please review the errors.")
+#         else:
+#             messages.success(request, "Upload successful!")
+
+#         return redirect('savings:upload_savings')
+
+#     # Provide months and years for the template, defaulting to the current month/year
+#     current_month = datetime.now().month
+#     current_year = datetime.now().year
+#     months = [(i, datetime(2024, i, 1).strftime('%B')) for i in range(1, 13)]
+#     years = [year for year in range(datetime.now().year - 5, datetime.now().year + 1)]
+
+#     return render(request, 'savings/savings_upload.html', {
+#         'months': months, 
+#         'years': years, 
+#         'current_month': current_month,
+#         'current_year': current_year
+#     })
 
 def upload_savings(request):
     if request.method == 'POST':
@@ -91,20 +274,61 @@ def upload_savings(request):
         year = request.POST.get('year')
         file = request.FILES.get('file')
 
+        # Validate form inputs
         if not month or not year:
             messages.error(request, 'Please select both month and year.')
             return redirect('savings:upload_savings')
-
         if not file:
             messages.error(request, 'No file uploaded.')
             return redirect('savings:upload_savings')
 
         try:
-            df = pd.read_excel(file)
+            # Determine file type
+            file_size = file.size  # Size in bytes
+            file_content = file.read()
+
+            # Use python-magic to check the file type
+            file_type = magic.from_buffer(file_content, mime=True)
+
+            if file_type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                # Handle Excel (.xlsx) file
+                try:
+                    df = pd.read_excel(file, engine='openpyxl', dtype=str)
+                except Exception as e:
+                    messages.error(request, f"Error reading Excel file: {str(e)}")
+                    return redirect('savings:upload_savings')
+
+            elif file_type == 'text/csv':
+                # Handle CSV file
+                encoding = 'utf-8'
+                try:
+                    file_content.decode(encoding)
+                    if file_size > 5 * 1024 * 1024:  # Use Dask for large files
+                        df = dd.read_csv(file, encoding=encoding).compute()
+                    else:
+                        df = pd.read_csv(file, encoding=encoding, dtype=str)
+                except UnicodeDecodeError:
+                    # Fallback encoding
+                    encoding = 'ISO-8859-1'
+                    if file_size > 5 * 1024 * 1024:
+                        df = dd.read_csv(file, encoding=encoding).compute()
+                    else:
+                        df = pd.read_csv(file, encoding=encoding, dtype=str)
+
+            else:
+                messages.error(request, 'Unsupported file type. Please upload a CSV or Excel file.')
+                return redirect('savings:upload_savings')
+
         except Exception as e:
             messages.error(request, f"Error reading file: {str(e)}")
             return redirect('savings:upload_savings')
 
+        # Check if the dataframe is empty or has no columns
+        if df.empty or df.columns.isnull().all():
+            messages.error(request, 'The file is empty or does not contain valid data.')
+            return redirect('savings:upload_savings')
+
+        # Define required columns
         required_columns = [
             'Owner Name', 'Received', 'Loan', 'Interest', 'Commodity',
             'Loan Repay', 'Interest Repay', 'Commodity Repay',
@@ -119,29 +343,32 @@ def upload_savings(request):
             messages.error(request, f"Missing required columns: {', '.join(missing_columns)}")
             return redirect('savings:upload_savings')
 
-        any_errors = False
+        # Get all active members for validation
         all_members = Member.objects.filter(is_staff=False, is_superuser=False, is_active=True)
         all_member_names = {
             f"{member.first_name.strip()} {member.last_name.strip()}": member
             for member in all_members
         }
 
+        # Process each row
+        any_errors = False
         for index, row in df.iterrows():
-            owner_name = str(row['Owner Name']).strip()
-            if not owner_name or owner_name.lower() == 'nan':
-                messages.warning(request, f"Empty 'Owner Name' at row {index + 2}, skipping.")
-                any_errors = True
-                continue
-
-            member = all_member_names.get(owner_name)
-            if not member:
-                close_matches = get_close_matches(owner_name, all_member_names.keys(), n=1, cutoff=0.6)
-                suggestion = f" Did you mean '{close_matches[0]}'?" if close_matches else ""
-                messages.warning(request, f"Owner '{owner_name}' not found at row {index + 2}.{suggestion}")
-                any_errors = True
-                continue
-
             try:
+                owner_name = str(row['Owner Name']).strip()
+                if not owner_name or owner_name.lower() == 'nan':
+                    messages.warning(request, f"Empty 'Owner Name' at row {index + 2}, skipping.")
+                    any_errors = True
+                    continue
+
+                member = all_member_names.get(owner_name)
+                if not member:
+                    close_matches = get_close_matches(owner_name, all_member_names.keys(), n=1, cutoff=0.6)
+                    suggestion = f" Did you mean '{close_matches[0]}'?" if close_matches else ""
+                    messages.warning(request, f"Owner '{owner_name}' not found at row {index + 2}.{suggestion}")
+                    any_errors = True
+                    continue
+
+                # Parsing and saving logic (same as before)
                 received = int(row['Received']) if pd.notna(row['Received']) else 0
                 loan = int(row['Loan']) if pd.notna(row['Loan']) else 0
                 interest = int(row['Interest']) if pd.notna(row['Interest']) else 0
@@ -158,14 +385,12 @@ def upload_savings(request):
                 add_share = int(row['Add Share']) if pd.notna(row['Add Share']) else 0
                 subtract_share = int(row['Subtract Share']) if pd.notna(row['Subtract Share']) else 0
 
-                # Get the previous month's record if it exists
                 prev_month = int(month) - 1 if int(month) > 1 else 12
                 prev_year = int(year) - 1 if int(month) == 1 else int(year)
                 previous_record = SavingAccount.objects.filter(
                     owner=member, month=prev_month, year=prev_year
                 ).first()
 
-                # Use previous record values as base for calculations
                 prev_savings = previous_record.savings_balance if previous_record else 0
                 prev_divine_touch = previous_record.divine_touch_balance if previous_record else 0
                 prev_rss = previous_record.rss_balance if previous_record else 0
@@ -174,7 +399,6 @@ def upload_savings(request):
                 prev_interest = previous_record.interest_balance if previous_record else 0
                 prev_commodity = previous_record.commodity_balance if previous_record else 0
 
-                # Update or create the new record
                 saving_account, created = SavingAccount.objects.get_or_create(
                     owner=member,
                     month=month,
@@ -191,13 +415,13 @@ def upload_savings(request):
                 saving_account.interest_balance = max(0, prev_interest + interest - interest_repay)
                 saving_account.commodity_balance = max(0, prev_commodity + commodity - commod_repay)
 
-                # Reflect individual values directly as Add or Subtract (new logic)
                 saving_account.savings = add_savings if add_savings else subtract_savings
                 saving_account.rss = add_rss if add_rss else subtract_rss
                 saving_account.divine_touch = add_divine_touch if add_divine_touch else subtract_divine_touch
                 saving_account.share = add_share if add_share else subtract_share
 
                 saving_account.save()
+
             except Exception as e:
                 messages.error(request, f"Error processing row {index + 2}: {str(e)}")
                 any_errors = True
@@ -209,15 +433,14 @@ def upload_savings(request):
 
         return redirect('savings:upload_savings')
 
-    # Provide months and years for the template, defaulting to the current month/year
     current_month = datetime.now().month
     current_year = datetime.now().year
     months = [(i, datetime(2024, i, 1).strftime('%B')) for i in range(1, 13)]
     years = [year for year in range(datetime.now().year - 5, datetime.now().year + 1)]
 
     return render(request, 'savings/savings_upload.html', {
-        'months': months, 
-        'years': years, 
+        'months': months,
+        'years': years,
         'current_month': current_month,
         'current_year': current_year
     })
