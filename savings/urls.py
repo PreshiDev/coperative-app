@@ -50,6 +50,6 @@ urlpatterns = [
     path('add-loan-account/', add_loan_account, name='add_loan_account'),
     path('add-interest-account/', add_interest_account, name='add_interest_account'),
     path('add-commodity-account/', add_commodity_account, name='add_commodity_account'),
-    path('download-template/', download_template, name='download_template'),
-    path('upload-savings/', upload_savings, name='upload_savings'),
+    #path('download-template/', download_template, name='download_template'),
+    #path('upload-savings/', upload_savings, name='upload_savings'),
 ]
