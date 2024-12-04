@@ -1,11 +1,5 @@
 {% extends 'base.html' %}
-<style>
-  .disabled-link {
-    pointer-events: none;
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-</style>
+
 {% block content %}
 
 <div class="container-fluid">
@@ -24,8 +18,7 @@
   <div class="alert alert-info mb-4">
     <strong>Instructions:</strong> 
     <ul>
-      <li>The "Upload" button is for uploading the required data using the Excel template. Please fill out the template and upload it here. The Compute Power for uploading is extensive for the current plan, <br>
-         upgrading the plan is advised, the button is currently disabled</li>
+      <li>The "Upload" button is for uploading the required data using the Excel template. Please fill out the template and upload it here.</li>
       <li>If you decide not to upload the required data, the "Account Operations" button allows you to enter the necessary data for each member using the application form.</li>
       <li>The "Edit" button allows you to correct any mistakes in the data for a particular month.</li>
     </ul>
@@ -37,7 +30,7 @@
       <h4>Operations</h4>
       <h3><a hx-get="{% url 'savings:deposit' %}" hx-target="#dynamic-content" class="btn btn-outline-info">Account Operations</a></h3>
       <h3><a class="btn btn-outline-info" hx-get="{% url 'savings:edit_saving_account' %}" hx-target="#dynamic-content">Edit</a></h3>
-      <h3><a class="btn btn-outline-info disabled-link hx-get="#" hx-target="#dynamic-content" aria-disabled="true">Upload</a></h3>
+      <h3><a class="btn btn-outline-info" hx-get="{% url 'savings:upload_savings' %}" hx-target="#dynamic-content">Upload</a></h3>
       <h3><a class="btn btn-outline-info invisible" hx-get="{% url 'savings:add_commodity_account' %}" hx-target="#dynamic-content">Commodity</a></h3>
       <h3><a class="btn btn-outline-info invisible" hx-get="{% url 'savings:add_loan_account' %}" hx-target="#dynamic-content">Loan</a></h3>
     </div>
