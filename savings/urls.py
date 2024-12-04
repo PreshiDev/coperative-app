@@ -10,8 +10,7 @@ from .views import (saving_deposit,saving_withdrawal,
         generate_pdf, edit_saving_account, delete_transaction,
         download_all_savings_excel, download_all_savings_pdf, download_teller_savings_excel,
         download_teller_savings_pdf, download_oracle_savings_excel, download_oracle_savings_pdf,
-        add_loan_account, add_interest_account, add_commodity_account, download_template,
-        upload_savings)
+        add_loan_account, add_interest_account, add_commodity_account)
 
 app_name = 'savings'
 urlpatterns = [

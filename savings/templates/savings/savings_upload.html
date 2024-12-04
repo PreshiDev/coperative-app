@@ -8,7 +8,7 @@
     </div>
   
     <!-- Form Section -->
-    <form method="POST" hx-post="{% url 'savings:upload_savings' %}" enctype="multipart/form-data" hx-target="#dynamic-content" class="form-group shadow p-4 bg-white rounded">
+    <form method="POST" hx-post="#" enctype="multipart/form-data" hx-target="#dynamic-content" class="form-group shadow p-4 bg-white rounded">
       {% csrf_token %}
   
       <!-- Month Selection -->
@@ -43,7 +43,7 @@
       <!-- Submit and Download Buttons -->
       <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
         <button type="submit" class="btn btn-primary px-4">Upload</button>
-        <a href="{% url 'savings:download_template' %}" class="btn btn-success px-4">
+        <a href="#" class="btn btn-success px-4">
           <i class="bi bi-download me-1"></i>Download Template
         </a>
       </div>
