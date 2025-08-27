@@ -8,6 +8,11 @@ from datetime import datetime
 from django.http import HttpResponse
 from django.contrib import messages
 from django.http import HttpResponseForbidden
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+import json
+from django.contrib.auth.decorators import login_required, permission_required
+from django.db.models import Count
 
 # import datetime
 
@@ -315,3 +320,95 @@ def delete_transaction(request, transaction_id):
         return HttpResponse("Record deleted successfully.")
     
     return HttpResponse("Invalid request method.", status=403)
+
+
+
+@login_required
+@permission_required('savings.delete_savingaccount', raise_exception=True)
+def bulk_delete_records(request):
+    template = 'reports/bulk_delete.html'
+    
+    # Get all months/years that have records
+    months_with_records = SavingAccount.objects.values('month', 'year').annotate(
+        record_count=Count('id')
+    ).order_by('-year', '-month')
+    
+    # Get unique years
+    years = SavingAccount.objects.values_list('year', flat=True).distinct().order_by('-year')
+    
+    # Format month names for display
+    formatted_records = []
+    for record in months_with_records:
+        month_num = record['month']
+        year = record['year']
+        month_name = datetime(2000, month_num, 1).strftime('%B')
+        formatted_records.append({
+            'month': month_num,
+            'year': year,
+            'month_name': month_name,
+            'record_count': record['record_count']
+        })
+    
+    context = {
+        'months_with_records': formatted_records,
+        'years': years,
+        'title': 'Bulk Record Deletion'
+    }
+    
+    return render(request, template, context)
+
+@login_required
+@permission_required('savings.delete_savingaccount', raise_exception=True)
+def delete_month_records(request, month, year):
+    if request.method == 'POST':
+        # Verify the user confirmed the deletion
+        if 'confirm_delete' not in request.POST:
+            return JsonResponse({
+                'success': False,
+                'message': "Deletion not confirmed."
+            }, status=400)
+        
+        # Get all records for the specified month and year
+        records_to_delete = SavingAccount.objects.filter(month=month, year=year)
+        record_count = records_to_delete.count()
+        
+        # Delete the records
+        records_to_delete.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f"Successfully deleted {record_count} records for {datetime(2000, month, 1).strftime('%B')} {year}."
+        })
+    
+    return JsonResponse({
+        'success': False,
+        'message': "Invalid request method."
+    }, status=400)
+
+@login_required
+@permission_required('savings.delete_savingaccount', raise_exception=True)
+def delete_year_records(request, year):
+    if request.method == 'POST':
+        # Verify the user confirmed the deletion
+        if 'confirm_delete' not in request.POST:
+            return JsonResponse({
+                'success': False,
+                'message': "Deletion not confirmed."
+            }, status=400)
+        
+        # Get all records for the specified year
+        records_to_delete = SavingAccount.objects.filter(year=year)
+        record_count = records_to_delete.count()
+        
+        # Delete the records
+        records_to_delete.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f"Successfully deleted {record_count} records for the year {year}."
+        })
+    
+    return JsonResponse({
+        'success': False,
+        'message': "Invalid request method."
+    }, status=400)

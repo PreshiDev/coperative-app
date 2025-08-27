@@ -36,11 +36,140 @@
             font-weight: bold;
             color: #000; /* Adjust text color based on your theme */
         }
+        
+        /* Page Loader Styles */
+        #page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #000000 0%, #ff6600 100%); /* Black to Orange */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        .loader-content {
+            text-align: center;
+            color: white;
+        }
+        
+        .loader-spinner {
+            width: 60px;
+            height: 60px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .loader-spinner:before, .loader-spinner:after {
+            content: "";
+            position: absolute;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: white;
+            animation: spin 1.5s linear infinite;
+        }
+        
+        .loader-spinner:before {
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-top-color: rgba(255, 255, 255, 0.8);
+            animation: spin 2s linear infinite;
+        }
+        
+        .loader-spinner:after {
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border-top-color: rgba(255, 255, 255, 0.5);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .loader-logo {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .loader-text {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-top: 15px;
+            letter-spacing: 1px;
+        }
+        
+        .loader-progress {
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+        
+        .loader-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: white;
+            border-radius: 10px;
+            animation: loading 2s ease-in-out infinite;
+        }
+        
+        @keyframes loading {
+            0% {
+                width: 0%;
+            }
+            50% {
+                width: 70%;
+            }
+            100% {
+                width: 100%;
+            }
+        }
+        
+        .fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        body.loaded #page-loader {
+            display: none;
+        }
     </style>
     <script src="https://unpkg.com/htmx.org@1.9.2"></script>
 </head>
 
 <body id="page-top">
+    <!-- Page Loader -->
+    <div id="page-loader">
+        <div class="loader-content">
+            <img src="/static/assets/img/custom/sango-coop-logo.jpeg" alt="Logo" class="loader-logo">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">Loading SangoCoop</div>
+            <div class="loader-progress">
+                <div class="loader-progress-bar"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- Logo at the top-right corner -->
     <div class="logo-container d-flex align-items-center">
@@ -157,6 +286,54 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
     <script src="/static/assets/js/theme.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Page Loader Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show loader immediately
+            const loader = document.getElementById('page-loader');
+            
+            // Hide loader when page is fully loaded
+            window.addEventListener('load', function() {
+                // Add a small delay for better UX
+                setTimeout(function() {
+                    loader.classList.add('fade-out');
+                    
+                    // Remove loader from DOM after fade out
+                    setTimeout(function() {
+                        loader.style.display = 'none';
+                        document.body.classList.add('loaded');
+                    }, 500);
+                }, 1000); // Minimum display time for loader
+            });
+            
+            // Fallback: hide loader after 5 seconds max
+            setTimeout(function() {
+                if (loader.style.display !== 'none') {
+                    loader.classList.add('fade-out');
+                    setTimeout(function() {
+                        loader.style.display = 'none';
+                        document.body.classList.add('loaded');
+                    }, 500);
+                }
+            }, 5000);
+        });
+        
+        // Show loader during HTMX requests
+        document.body.addEventListener('htmx:beforeRequest', function() {
+            document.getElementById('page-loader').style.display = 'flex';
+        });
+        
+        document.body.addEventListener('htmx:afterRequest', function() {
+            setTimeout(function() {
+                document.getElementById('page-loader').classList.add('fade-out');
+                setTimeout(function() {
+                    document.getElementById('page-loader').style.display = 'none';
+                }, 500);
+            }, 500);
+        });
+    </script>
+    
     {% block script %}
 
     {% endblock %}

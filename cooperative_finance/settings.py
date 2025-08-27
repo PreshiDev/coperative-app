@@ -28,7 +28,8 @@ DEBUG = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-ALLOWED_HOSTS = ['sangocoop.com.ng', '127.0.0.1']
+ALLOWED_HOSTS = ['sangocoop.com.ng', '127.0.0.1', 'www.sangocoop.com.ng']
+# ALLOWED_HOSTS = ["*"]
 
 STATICFILES_DIRS = [
         os.path.join(BASE_DIR,'static')

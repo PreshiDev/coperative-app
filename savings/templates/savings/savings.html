@@ -31,6 +31,11 @@
       <h3><a hx-get="{% url 'savings:deposit' %}" hx-target="#dynamic-content" class="btn btn-outline-info">Account Operations</a></h3>
       <h3><a class="btn btn-outline-info" hx-get="{% url 'savings:edit_saving_account' %}" hx-target="#dynamic-content">Edit</a></h3>
       <h3><a class="btn btn-outline-info" hx-get="{% url 'savings:upload_savings' %}" hx-target="#dynamic-content">Upload</a></h3>
+      <h3>
+          <a class="btn btn-outline-info" hx-get="{% url 'reports:bulk_delete_records' %}" hx-target="#dynamic-content">
+              <i class="fas fa-trash-alt me-2"></i>Bulk Delete
+          </a>
+      </h3>
       <h3><a class="btn btn-outline-info invisible" hx-get="{% url 'savings:add_commodity_account' %}" hx-target="#dynamic-content">Commodity</a></h3>
       <h3><a class="btn btn-outline-info invisible" hx-get="{% url 'savings:add_loan_account' %}" hx-target="#dynamic-content">Loan</a></h3>
     </div>
